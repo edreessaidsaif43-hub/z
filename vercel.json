@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/share/:id",
+      "destination": "/index.html"
+    }
+  ]
+}
