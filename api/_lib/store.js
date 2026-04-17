@@ -1,26 +1,4 @@
-const hasKvEnv =
-  !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
-
-let kvClient = null;
-
-async function getKv() {
-  if (!hasKvEnv) return null;
-  if (!kvClient) {
-    const mod = await import("@vercel/kv");
-    kvClient = mod.kv;
-  }
-  return kvClient;
-}
-
-function randomId(length = 10) {
-  const chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let out = "";
-  for (let i = 0; i < length; i += 1) {
-    out += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return out;
-}
+const GAS_WEB_APP_URL = process.env.GAS_WEB_APP_URL || "";
 
 function sanitizePayload(payload) {
   const profile = { ...(payload?.profile || {}) };
@@ -33,30 +11,72 @@ function sanitizePayload(payload) {
 }
 
 export async function createPortfolio(payload) {
-  const kv = await getKv();
-  if (!kv) {
-    return { error: "kv_not_configured" };
+  if (!GAS_WEB_APP_URL) {
+    return { error: "gas_not_configured" };
   }
 
   const safePayload = sanitizePayload(payload);
-  let id = randomId(8);
-  let tries = 0;
+  try {
+    const res = await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "create",
+        payload: safePayload,
+      }),
+    });
 
-  while (tries < 5) {
-    const exists = await kv.get(`portfolio:${id}`);
-    if (!exists) break;
-    id = randomId(8);
-    tries += 1;
+    if (!res.ok) return { error: "upstream_failed" };
+    const json = await res.json();
+    if (!json?.ok || !json?.id) return { error: "upstream_failed" };
+    return { id: String(json.id), data: safePayload };
+  } catch (error) {
+    return { error: "upstream_failed" };
   }
-
-  await kv.set(`portfolio:${id}`, safePayload, { ex: 60 * 60 * 24 * 90 });
-  return { id, data: safePayload };
 }
 
 export async function readPortfolio(id) {
-  const kv = await getKv();
-  if (!kv) return { error: "kv_not_configured" };
-  const data = await kv.get(`portfolio:${id}`);
-  if (!data) return { error: "not_found" };
-  return { data };
+  if (!GAS_WEB_APP_URL) return { error: "gas_not_configured" };
+  try {
+    const url = `${GAS_WEB_APP_URL}?action=get&id=${encodeURIComponent(id)}`;
+    const res = await fetch(url, { method: "GET" });
+    if (res.status === 404) return { error: "not_found" };
+    if (!res.ok) return { error: "upstream_failed" };
+    const json = await res.json();
+    if (!json?.ok || !json?.data) return { error: "not_found" };
+    return { data: json.data };
+  } catch (error) {
+    return { error: "upstream_failed" };
+  }
+}
+
+export async function uploadMedia(payload) {
+  if (!GAS_WEB_APP_URL) return { error: "gas_not_configured" };
+  try {
+    const res = await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "uploadMedia",
+        payload: {
+          fileName: payload?.fileName || "media.bin",
+          mimeType: payload?.mimeType || "application/octet-stream",
+          base64Data: payload?.base64Data || "",
+          kind: payload?.kind || "file",
+        },
+      }),
+    });
+    if (!res.ok) return { error: "upstream_failed" };
+    const json = await res.json();
+    if (!json?.ok || !json?.mediaUrl) return { error: "upstream_failed" };
+    return {
+      data: {
+        mediaFileId: json.mediaFileId || "",
+        mediaUrl: json.mediaUrl,
+        mediaName: json.mediaName || payload?.fileName || "",
+      },
+    };
+  } catch (error) {
+    return { error: "upstream_failed" };
+  }
 }

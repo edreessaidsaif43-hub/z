@@ -13,11 +13,18 @@ export default async function handler(req, res) {
   }
 
   const created = await createPortfolio(payload);
-  if (created.error === "kv_not_configured") {
+  if (created.error === "gas_not_configured") {
     res.status(500).json({
-      error: "kv_not_configured",
+      error: "gas_not_configured",
       message:
-        "Vercel KV is not configured. Add KV_REST_API_URL and KV_REST_API_TOKEN.",
+        "Google Apps Script is not configured. Add GAS_WEB_APP_URL in Vercel Environment Variables.",
+    });
+    return;
+  }
+  if (created.error) {
+    res.status(502).json({
+      error: created.error,
+      message: "Failed to store portfolio in Google Apps Script backend.",
     });
     return;
   }

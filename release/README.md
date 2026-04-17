@@ -48,3 +48,10 @@ powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 ## نشر سحابي مباشر (Ubuntu + HTTPS)
 - اتبع الملف: `DEPLOY_CLOUD_UBUNTU.md`
 - توجد سكربتات جاهزة داخل: `deploy/`
+
+## نشر Vercel مع Google Apps Script
+- اتبع الملف: `DEPLOY_VERCEL.md`
+- انسخ كود Apps Script من: `google-apps-script/Code.gs`
+- أضف متغير البيئة في Vercel:
+  - `GAS_WEB_APP_URL`
+- الوسائط (صور/فيديو) تُرفع كملفات فعلية في Google Drive عبر Apps Script

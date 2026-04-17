@@ -19,7 +19,8 @@ $files = @(
   "app.py",
   "start.bat",
   "README.md",
-  "DEPLOY_CLOUD_UBUNTU.md"
+  "DEPLOY_CLOUD_UBUNTU.md",
+  "DEPLOY_VERCEL.md"
 )
 
 foreach ($f in $files) {
@@ -34,6 +35,12 @@ $deploySrc = Join-Path $ProjectRoot "deploy"
 $deployDst = Join-Path $ReleasePath "deploy"
 if (Test-Path -LiteralPath $deploySrc) {
   Copy-Item -LiteralPath $deploySrc -Destination $deployDst -Recurse -Force
+}
+
+$gasSrc = Join-Path $ProjectRoot "google-apps-script"
+$gasDst = Join-Path $ReleasePath "google-apps-script"
+if (Test-Path -LiteralPath $gasSrc) {
+  Copy-Item -LiteralPath $gasSrc -Destination $gasDst -Recurse -Force
 }
 
 if (Test-Path -LiteralPath $ZipPath) {

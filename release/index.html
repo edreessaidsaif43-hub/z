@@ -624,6 +624,28 @@
       });
     }
 
+    async function uploadMediaToBackend(file, kind) {
+      const dataUrl = await readFileAsDataUrl(file);
+      const base64Data = String(dataUrl).split(",")[1] || "";
+      const res = await fetch(`${API_BASE}/api/media/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          mimeType: file.type,
+          base64Data,
+          kind
+        })
+      });
+
+      if (!res.ok) {
+        let details = {};
+        try { details = await res.json(); } catch (e) {}
+        throw new Error(details?.error || "media_upload_failed");
+      }
+      return res.json();
+    }
+
     function updateHeader() {
       const p = appState.profile;
       if (!p) return;
@@ -722,10 +744,11 @@
         const tagPart = item.tag ? `<small>تصنيف/مهارة: ${item.tag}</small>` : "";
         const deleteBtn = appState.isSharedView ? "" : `<button class="btn btn-danger" data-delete="${item.id}">حذف</button>`;
         let mediaPart = "";
-        if (item.mediaKind === "image" && item.mediaDataUrl) {
-          mediaPart = `<div class="media-wrap"><img src="${item.mediaDataUrl}" alt="${item.title}" loading="lazy" /></div>`;
-        } else if (item.mediaKind === "video" && item.mediaDataUrl) {
-          mediaPart = `<div class="media-wrap"><video controls preload="metadata"><source src="${item.mediaDataUrl}" /></video></div>`;
+        const mediaSrc = item.mediaUrl || item.mediaDataUrl || "";
+        if (item.mediaKind === "image" && mediaSrc) {
+          mediaPart = `<div class="media-wrap"><img src="${mediaSrc}" alt="${item.title}" loading="lazy" /></div>`;
+        } else if (item.mediaKind === "video" && mediaSrc) {
+          mediaPart = `<div class="media-wrap"><video controls preload="metadata"><source src="${mediaSrc}" /></video></div>`;
         }
         return `
           <article class="item">
@@ -876,7 +899,12 @@
           body: JSON.stringify(snapshot)
         });
         if (!res.ok) {
-          throw new Error("share_failed");
+          let details = {};
+          try {
+            details = await res.json();
+          } catch (e) {}
+          const reason = details?.error || "share_failed";
+          throw new Error(reason);
         }
         const data = await res.json();
         const shortLink = data.url || link;
@@ -885,7 +913,12 @@
         navigator.clipboard?.writeText(shortLink).catch(() => {});
       } catch (error) {
         el.shareBox.hidden = false;
-        el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير من الخادم.</strong><br>تم إنشاء رابط بديل:<br>${link}`;
+        const isGasMissing = String(error?.message || "").includes("gas_not_configured");
+        if (isGasMissing) {
+          el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير.</strong><br>يلزم ضبط Google Apps Script أولاً (المتغير GAS_WEB_APP_URL).<br>رابط بديل مؤقت:<br>${link}`;
+        } else {
+          el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير من الخادم.</strong><br>تم إنشاء رابط بديل:<br>${link}`;
+        }
         navigator.clipboard?.writeText(link).catch(() => {});
       }
     }
@@ -1042,8 +1075,8 @@
     el.entryFile.addEventListener("change", () => {
       const file = el.entryFile.files?.[0];
       el.fileNote.textContent = file
-        ? `تم اختيار الملف: ${file.name} (سيظهر في رابط التقييم إذا كان صورة أو فيديو).`
-        : "لن يتم رفع الملف للخادم في هذه النسخة، يتم حفظه داخل المتصفح للعرض في رابط التقييم.";
+        ? `تم اختيار الملف: ${file.name} (سيتم رفعه إلى Google Drive إذا كان صورة أو فيديو).`
+        : "سيتم رفع الصور والفيديو إلى Google Drive وتخزين رابطها داخل الإنجاز.";
     });
 
     el.addEntryBtn.addEventListener("click", async () => {
@@ -1062,22 +1095,42 @@
       const fileName = file?.name || "";
       let mediaKind = "";
       let mediaDataUrl = "";
+      let mediaUrl = "";
+      let mediaFileId = "";
+      let mediaName = "";
 
       if (file) {
         try {
           if (file.type.startsWith("image/")) {
             mediaKind = "image";
-            mediaDataUrl = await readFileAsDataUrl(file);
+            if (file.size > 3 * 1024 * 1024) {
+              alert("حجم الصورة كبير جدًا (أكثر من 3MB). صغّر الصورة ثم أعد المحاولة.");
+              return;
+            }
+            const uploaded = await uploadMediaToBackend(file, mediaKind);
+            mediaUrl = uploaded.mediaUrl || "";
+            mediaFileId = uploaded.mediaFileId || "";
+            mediaName = uploaded.mediaName || file.name;
           } else if (file.type.startsWith("video/")) {
-            if (file.size > 10 * 1024 * 1024) {
-              alert("الفيديو كبير جدًا (أكبر من 10MB) وقد لا يعمل في رابط المشاركة. اختر ملفًا أصغر.");
+            if (file.size > 3 * 1024 * 1024) {
+              alert("حجم الفيديو كبير جدًا (أكثر من 3MB) للنشر الحالي. اختر ملفًا أصغر أو اضغط الفيديو.");
               return;
             }
             mediaKind = "video";
-            mediaDataUrl = await readFileAsDataUrl(file);
+            const uploaded = await uploadMediaToBackend(file, mediaKind);
+            mediaUrl = uploaded.mediaUrl || "";
+            mediaFileId = uploaded.mediaFileId || "";
+            mediaName = uploaded.mediaName || file.name;
           }
         } catch (error) {
-          alert("تعذر قراءة الملف المرفق. جرّب ملفًا آخر.");
+          const reason = String(error?.message || "");
+          if (reason.includes("gas_not_configured")) {
+            alert("تعذر رفع الوسائط: يجب ضبط GAS_WEB_APP_URL في Vercel وربط Google Apps Script.");
+          } else if (reason.includes("payload_too_large")) {
+            alert("حجم الملف أكبر من الحد المسموح في الرفع الحالي.");
+          } else {
+            alert("تعذر رفع الملف إلى Google Drive. جرّب ملفًا أصغر أو أعد المحاولة.");
+          }
           return;
         }
       }
@@ -1090,6 +1143,9 @@
         tag: el.entryTag.value.trim(),
         fileName,
         mediaKind,
+        mediaUrl,
+        mediaFileId,
+        mediaName,
         mediaDataUrl,
         createdAt: new Date().toISOString()
       });
@@ -1098,7 +1154,7 @@
       el.entryDesc.value = "";
       el.entryTag.value = "";
       el.entryFile.value = "";
-      el.fileNote.textContent = "لن يتم رفع الملف للخادم في هذه النسخة، يتم حفظه داخل المتصفح للعرض في رابط التقييم.";
+      el.fileNote.textContent = "سيتم رفع الصور والفيديو إلى Google Drive وتخزين رابطها داخل الإنجاز.";
 
       saveState();
       computeStats();
