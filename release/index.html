@@ -925,9 +925,9 @@
         navigator.clipboard?.writeText(shortLink).catch(() => {});
       } catch (error) {
         el.shareBox.hidden = false;
-        const isGasMissing = String(error?.message || "").includes("gas_not_configured");
-        if (isGasMissing) {
-          el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير.</strong><br>يلزم ضبط Google Apps Script أولاً (المتغير GAS_WEB_APP_URL).<br>رابط بديل مؤقت:<br>${link}`;
+        const isKvMissing = String(error?.message || "").includes("kv_not_configured");
+        if (isKvMissing) {
+          el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير.</strong><br>يلزم تفعيل Vercel KV أولاً.<br>رابط بديل مؤقت:<br>${link}`;
         } else {
           el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير من الخادم.</strong><br>تم إنشاء رابط بديل:<br>${link}`;
         }
@@ -1171,8 +1171,8 @@
           const [reason, detail] = packed.split("::");
           if (reason.includes("blob_not_configured")) {
             alert("تعذر رفع الوسائط: يجب تفعيل Vercel Blob في المشروع.");
-          } else if (reason.includes("gas_not_configured")) {
-            alert("تعذر رفع الوسائط: يوجد خلل في إعدادات الخادم.");
+          } else if (reason.includes("kv_not_configured")) {
+            alert("تعذر رفع الوسائط: يوجد خلل في إعدادات قاعدة بيانات Vercel KV.");
           } else if (reason.includes("payload_too_large")) {
             alert("حجم الملف أكبر من الحد المسموح في الرفع الحالي.");
           } else if (detail) {

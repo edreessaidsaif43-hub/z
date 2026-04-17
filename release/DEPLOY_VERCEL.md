@@ -1,52 +1,34 @@
-# Vercel Deployment with Google Apps Script Storage
+# Vercel Deployment (Vercel-Only Data)
 
-This project now stores share links in **Google Apps Script** (not Vercel KV).
+This project now uses only Vercel services:
+- **Vercel KV** for accounts, portfolio data, and short share links
+- **Vercel Blob** for images/videos
 
-## 1) Deploy Google Apps Script backend
-1. Open [script.google.com](https://script.google.com)
-2. Create a new project
-3. Copy code from:
-   - `google-apps-script/Code.gs`
-4. In Google Drive, create a folder for saved portfolios
-5. Copy that folder ID
-6. In Apps Script: Project Settings -> Script properties:
-   - `ENJAZY_FOLDER_ID=YOUR_FOLDER_ID`
-   - `ENJAZY_MEDIA_FOLDER_ID=YOUR_MEDIA_FOLDER_ID` (optional, if omitted uses ENJAZY_FOLDER_ID)
-   - `ENJAZY_USERS_FOLDER_ID=YOUR_USERS_FOLDER_ID` (optional, if omitted uses ENJAZY_FOLDER_ID)
-7. Deploy -> New deployment -> Web app
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-8. Copy Web app URL (ends with `/exec`)
+## 1) Connect Vercel KV
+1. Vercel Dashboard -> Storage -> Create -> KV
+2. Connect KV to this project
+3. Confirm env vars exist:
+   - `KV_REST_API_URL`
+   - `KV_REST_API_TOKEN`
 
-## 2) Configure Vercel env var
-In Vercel project settings -> Environment Variables:
-- `GAS_WEB_APP_URL = https://script.google.com/macros/s/.../exec`
-
-## 2.1) Configure Vercel Blob (for images/videos)
+## 2) Connect Vercel Blob
 1. Vercel Dashboard -> Storage -> Create -> Blob
 2. Connect Blob to this project
 3. Confirm env var exists:
    - `BLOB_READ_WRITE_TOKEN`
 
-Then redeploy project.
+## 3) Redeploy
+After connecting KV + Blob, redeploy project.
 
-## 3) Verify
+## 4) Verify
 1. Open:
    - `/api/portfolios/test`
 2. Expected:
    - `{"error":"not_found"}` (good)
-   - Not `gas_not_configured`
+   - Not `kv_not_configured`
 
-## 4) Test from UI
-1. Add portfolio entries
-2. Click Share
-3. You should get short link: `/share/{id}`
-
-## Media Upload Notes
-- Images/videos are uploaded as real files to Vercel Blob storage.
-- The app stores only file URL/id in portfolio entries.
-- Keep media files small for serverless upload (recommended <= 3MB).
-
-## Accounts & Portfolio DB
-- Teacher accounts and portfolio entries are stored in Google Drive JSON files through Apps Script.
-- Login/register/save/load now depend on GAS backend, not browser localStorage.
+## 5) Test from UI
+1. Create account
+2. Login from another device (should work)
+3. Add entries and upload image/video
+4. Click Share -> short link `/share/{id}`

@@ -49,10 +49,11 @@ powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 - اتبع الملف: `DEPLOY_CLOUD_UBUNTU.md`
 - توجد سكربتات جاهزة داخل: `deploy/`
 
-## نشر Vercel مع Google Apps Script
+## نشر Vercel (Vercel-Only)
 - اتبع الملف: `DEPLOY_VERCEL.md`
-- انسخ كود Apps Script من: `google-apps-script/Code.gs`
-- أضف متغير البيئة في Vercel:
-  - `GAS_WEB_APP_URL`
+- أضف وربط Vercel Storage:
+  - `KV_REST_API_URL`
+  - `KV_REST_API_TOKEN`
+  - `BLOB_READ_WRITE_TOKEN`
 - الوسائط (صور/فيديو) تُرفع كملفات فعلية في Vercel Blob Storage
-- الحسابات وبيانات ملف الإنجاز (حفظ/جلب) أصبحت من قاعدة البيانات عبر Apps Script
+- الحسابات وبيانات ملف الإنجاز (حفظ/جلب) محفوظة في Vercel KV

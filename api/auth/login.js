@@ -9,10 +9,10 @@ export default async function handler(req, res) {
   const payload = req.body || {};
   const out = await loginTeacher(payload);
 
-  if (out.error === "gas_not_configured") {
+  if (out.error === "kv_not_configured") {
     res.status(500).json({
-      error: "gas_not_configured",
-      message: "GAS_WEB_APP_URL is missing in Vercel environment variables.",
+      error: "kv_not_configured",
+      message: "Vercel KV is not configured. Connect KV storage to this project.",
     });
     return;
   }

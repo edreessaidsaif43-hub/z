@@ -1,125 +1,233 @@
-const GAS_WEB_APP_URL = process.env.GAS_WEB_APP_URL || "";
+import { kv } from "@vercel/kv";
+
+const hasKvEnv =
+  !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
+
+function kvUnavailable() {
+  return { error: "kv_not_configured" };
+}
+
+function randomId(length = 10) {
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let out = "";
+  for (let i = 0; i < length; i += 1) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
+function normalizeContact(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function sanitizeProfile(profile = {}) {
+  const out = { ...profile };
+  delete out.password;
+  delete out.contactNorm;
+  return out;
+}
 
 function sanitizeSharePayload(payload) {
-  const profile = { ...(payload?.profile || {}) };
-  delete profile.password;
   return {
-    profile,
+    profile: sanitizeProfile(payload?.profile || {}),
     entries: Array.isArray(payload?.entries) ? payload.entries : [],
     generatedAt: payload?.generatedAt || new Date().toISOString(),
   };
 }
 
-async function gasPost(action, payload) {
-  if (!GAS_WEB_APP_URL) return { error: "gas_not_configured" };
-  try {
-    const res = await fetch(GAS_WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, payload }),
-    });
-    if (!res.ok) return { error: "upstream_failed", message: `HTTP_${res.status}` };
-    const json = await res.json();
-    if (!json?.ok) {
-      return {
-        error: json?.error || "upstream_failed",
-        message: json?.message || "Google Apps Script returned a failed response.",
-      };
-    }
-    return { data: json };
-  } catch (error) {
-    return { error: "upstream_failed", message: String(error?.message || error) };
-  }
+async function getUserByContact(contactNorm) {
+  const userId = await kv.get(`userByContact:${contactNorm}`);
+  if (!userId) return null;
+  const user = await kv.get(`user:${userId}`);
+  return user || null;
 }
 
-async function gasGet(params) {
-  if (!GAS_WEB_APP_URL) return { error: "gas_not_configured" };
-  try {
-    const url = `${GAS_WEB_APP_URL}?${new URLSearchParams(params).toString()}`;
-    const res = await fetch(url, { method: "GET" });
-    if (res.status === 404) return { error: "not_found" };
-    if (!res.ok) return { error: "upstream_failed", message: `HTTP_${res.status}` };
-    const json = await res.json();
-    if (!json?.ok) {
-      return {
-        error: json?.error || "upstream_failed",
-        message: json?.message || "Google Apps Script returned a failed response.",
-      };
-    }
-    return { data: json };
-  } catch (error) {
-    return { error: "upstream_failed", message: String(error?.message || error) };
-  }
+async function getUserById(userId) {
+  const user = await kv.get(`user:${userId}`);
+  return user || null;
 }
 
 export async function registerTeacher(payload) {
-  return gasPost("registerTeacher", payload || {});
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const contactNorm = normalizeContact(payload?.contact);
+    const password = String(payload?.password || "");
+    if (!contactNorm || !password) {
+      return { error: "invalid_payload", message: "Missing contact or password." };
+    }
+
+    const existing = await getUserByContact(contactNorm);
+    if (existing) return { error: "user_exists", message: "Account already exists." };
+
+    const userId = randomId(10);
+    const profile = {
+      name: String(payload?.name || ""),
+      contact: String(payload?.contact || ""),
+      school: String(payload?.school || ""),
+      subject: String(payload?.subject || ""),
+      grades: String(payload?.grades || ""),
+    };
+
+    const record = {
+      userId,
+      contactNorm,
+      password,
+      profile,
+      entries: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await kv.set(`user:${userId}`, record);
+    await kv.set(`userByContact:${contactNorm}`, userId);
+
+    return {
+      data: {
+        userId,
+        profile: sanitizeProfile(profile),
+        entries: [],
+      },
+    };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function loginTeacher(payload) {
-  return gasPost("loginTeacher", payload || {});
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const contactNorm = normalizeContact(payload?.contact);
+    const password = String(payload?.password || "");
+    if (!contactNorm || !password) {
+      return { error: "invalid_credentials", message: "Missing credentials." };
+    }
+
+    const user = await getUserByContact(contactNorm);
+    if (!user) return { error: "not_found", message: "Account not found." };
+    if (String(user.password || "") !== password) {
+      return { error: "invalid_credentials", message: "Password mismatch." };
+    }
+
+    return {
+      data: {
+        userId: user.userId,
+        profile: sanitizeProfile(user.profile || {}),
+        entries: Array.isArray(user.entries) ? user.entries : [],
+      },
+    };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function resetTeacherPassword(payload) {
-  return gasPost("resetTeacherPassword", payload || {});
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const contactNorm = normalizeContact(payload?.contact);
+    const newPassword = String(payload?.newPassword || "");
+    const name = String(payload?.name || "").trim();
+    if (!contactNorm || !newPassword) {
+      return { error: "invalid_payload", message: "Missing reset fields." };
+    }
+
+    const user = await getUserByContact(contactNorm);
+    if (!user) return { error: "not_found", message: "Account not found." };
+    if (name) {
+      const currentName = String(user?.profile?.name || "").trim();
+      if (currentName !== name) {
+        return { error: "name_mismatch", message: "Teacher name does not match." };
+      }
+    }
+
+    user.password = newPassword;
+    user.updatedAt = new Date().toISOString();
+    await kv.set(`user:${user.userId}`, user);
+    return { data: { ok: true } };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function saveTeacherPortfolio(payload) {
-  const safePayload = {
-    userId: payload?.userId || "",
-    profile: { ...(payload?.profile || {}) },
-    entries: Array.isArray(payload?.entries) ? payload.entries : [],
-  };
-  delete safePayload.profile.password;
-  return gasPost("saveTeacherPortfolio", safePayload);
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const userId = String(payload?.userId || "");
+    if (!userId) return { error: "invalid_payload", message: "Missing userId." };
+
+    const user = await getUserById(userId);
+    if (!user) return { error: "not_found", message: "User not found." };
+
+    const incomingProfile = payload?.profile || {};
+    user.profile = {
+      name: String(incomingProfile.name || user?.profile?.name || ""),
+      contact: String(incomingProfile.contact || user?.profile?.contact || ""),
+      school: String(incomingProfile.school || user?.profile?.school || ""),
+      subject: String(incomingProfile.subject || user?.profile?.subject || ""),
+      grades: String(incomingProfile.grades || user?.profile?.grades || ""),
+    };
+    user.contactNorm = normalizeContact(user.profile.contact);
+    user.entries = Array.isArray(payload?.entries) ? payload.entries : [];
+    user.updatedAt = new Date().toISOString();
+
+    await kv.set(`user:${user.userId}`, user);
+    if (user.contactNorm) await kv.set(`userByContact:${user.contactNorm}`, user.userId);
+    return { data: { ok: true } };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function loadTeacherPortfolio(userId) {
-  return gasGet({ action: "loadTeacherPortfolio", userId: String(userId || "") });
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const user = await getUserById(String(userId || ""));
+    if (!user) return { error: "not_found", message: "User not found." };
+    return {
+      data: {
+        userId: user.userId,
+        profile: sanitizeProfile(user.profile || {}),
+        entries: Array.isArray(user.entries) ? user.entries : [],
+      },
+    };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function clearTeacherPortfolio(userId) {
-  return gasPost("clearTeacherPortfolio", { userId: String(userId || "") });
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const user = await getUserById(String(userId || ""));
+    if (!user) return { error: "not_found", message: "User not found." };
+    user.entries = [];
+    user.updatedAt = new Date().toISOString();
+    await kv.set(`user:${user.userId}`, user);
+    return { data: { ok: true } };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function createPortfolio(payload) {
-  const out = await gasPost("create", sanitizeSharePayload(payload));
-  if (out.error) return out;
-  const id = out?.data?.id;
-  if (!id) return { error: "upstream_failed", message: "Missing id from GAS response." };
-  return { id: String(id), data: sanitizeSharePayload(payload) };
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const data = sanitizeSharePayload(payload);
+    const id = randomId(8);
+    await kv.set(`share:${id}`, data, { ex: 60 * 60 * 24 * 90 });
+    return { id, data };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
+  }
 }
 
 export async function readPortfolio(id) {
-  const out = await gasGet({ action: "get", id: String(id || "") });
-  if (out.error === "not_found") return out;
-  if (out.error) return out;
-  if (!out?.data?.data) return { error: "not_found" };
-  return { data: out.data.data };
-}
-
-export async function uploadMedia(payload) {
-  const out = await gasPost("uploadMedia", {
-    fileName: payload?.fileName || "media.bin",
-    mimeType: payload?.mimeType || "application/octet-stream",
-    base64Data: payload?.base64Data || "",
-    kind: payload?.kind || "file",
-  });
-  if (out.error) return out;
-  const json = out.data || {};
-  if (!json?.mediaUrl) {
-    return {
-      error: "upstream_failed",
-      message: "Google Apps Script returned an invalid media response.",
-    };
+  if (!hasKvEnv) return kvUnavailable();
+  try {
+    const data = await kv.get(`share:${String(id || "")}`);
+    if (!data) return { error: "not_found" };
+    return { data };
+  } catch (error) {
+    return { error: "upstream_failed", message: String(error?.message || error) };
   }
-  return {
-    data: {
-      mediaFileId: json.mediaFileId || "",
-      mediaUrl: json.mediaUrl,
-      mediaName: json.mediaName || payload?.fileName || "",
-      sharingEnabled: json.sharingEnabled !== false,
-      sharingError: json.sharingError || "",
-    },
-  };
 }

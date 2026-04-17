@@ -13,11 +13,11 @@ export default async function handler(req, res) {
   }
 
   const out = await readPortfolio(String(id));
-  if (out.error === "gas_not_configured") {
+  if (out.error === "kv_not_configured") {
     res.status(500).json({
-      error: "gas_not_configured",
+      error: "kv_not_configured",
       message:
-        "Google Apps Script is not configured. Add GAS_WEB_APP_URL in Vercel Environment Variables.",
+        "Vercel KV is not configured. Connect KV storage to this project.",
     });
     return;
   }
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   if (out.error) {
     res.status(502).json({
       error: out.error,
-      message: "Failed to read portfolio from Google Apps Script backend.",
+      message: out.message || "Failed to read portfolio from Vercel KV backend.",
     });
     return;
   }

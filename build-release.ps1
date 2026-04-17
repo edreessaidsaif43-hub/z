@@ -46,12 +46,6 @@ if (Test-Path -LiteralPath $apiSrc) {
   Copy-Item -LiteralPath $apiSrc -Destination $apiDst -Recurse -Force
 }
 
-$gasSrc = Join-Path $ProjectRoot "google-apps-script"
-$gasDst = Join-Path $ReleasePath "google-apps-script"
-if (Test-Path -LiteralPath $gasSrc) {
-  Copy-Item -LiteralPath $gasSrc -Destination $gasDst -Recurse -Force
-}
-
 if (Test-Path -LiteralPath $ZipPath) {
   Remove-Item -LiteralPath $ZipPath -Force
 }
