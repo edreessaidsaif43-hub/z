@@ -54,4 +54,5 @@ powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 - انسخ كود Apps Script من: `google-apps-script/Code.gs`
 - أضف متغير البيئة في Vercel:
   - `GAS_WEB_APP_URL`
-- الوسائط (صور/فيديو) تُرفع كملفات فعلية في Google Drive عبر Apps Script
+- الوسائط (صور/فيديو) تُرفع كملفات فعلية في Vercel Blob Storage
+- الحسابات وبيانات ملف الإنجاز (حفظ/جلب) أصبحت من قاعدة البيانات عبر Apps Script

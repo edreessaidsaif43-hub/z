@@ -520,7 +520,6 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "oman_teacher_portfolio_v1";
     const API_BASE = "";
     const sectionNames = {
       daily: "التحضير اليومي",
@@ -533,6 +532,7 @@
     };
 
     const appState = {
+      userId: "",
       profile: null,
       entries: [],
       activeTab: "all",
@@ -590,25 +590,29 @@
       progressBar: document.getElementById("progressBar")
     };
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        profile: appState.profile,
-        entries: appState.entries
-      }));
+    async function apiJson(path, options = {}) {
+      const res = await fetch(`${API_BASE}${path}`, options);
+      let body = {};
+      try { body = await res.json(); } catch (e) {}
+      if (!res.ok) {
+        const reason = body?.error || "api_error";
+        const message = body?.message || "";
+        throw new Error(`${reason}::${message}`);
+      }
+      return body;
     }
 
-    function loadState() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.profile) {
-          appState.profile = parsed.profile;
-          appState.entries = Array.isArray(parsed.entries) ? parsed.entries : [];
-        }
-      } catch (e) {
-        console.warn("Failed to parse state", e);
-      }
+    async function savePortfolioRemote() {
+      if (!appState.userId || !appState.profile) return;
+      await apiJson("/api/portfolio/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: appState.userId,
+          profile: appState.profile,
+          entries: appState.entries
+        })
+      });
     }
 
     function fmtDate(iso) {
@@ -641,7 +645,9 @@
       if (!res.ok) {
         let details = {};
         try { details = await res.json(); } catch (e) {}
-        throw new Error(details?.error || "media_upload_failed");
+        const reason = details?.error || "media_upload_failed";
+        const message = details?.message || "";
+        throw new Error(`${reason}::${message}`);
       }
       return res.json();
     }
@@ -788,12 +794,18 @@
 
       if (!appState.isSharedView) {
         el.listArea.querySelectorAll("[data-delete]").forEach(btn => {
-          btn.addEventListener("click", () => {
+          btn.addEventListener("click", async () => {
             const id = btn.getAttribute("data-delete");
+            const before = appState.entries.slice();
             appState.entries = appState.entries.filter(e => e.id !== id);
-            saveState();
-            computeStats();
-            renderList();
+            try {
+              await savePortfolioRemote();
+              computeStats();
+              renderList();
+            } catch (error) {
+              appState.entries = before;
+              alert("تعذر حذف الإنجاز من قاعدة البيانات.");
+            }
           });
         });
       }
@@ -951,17 +963,12 @@
 
       appState.isSharedView = false;
       document.body.classList.remove("shared-view");
-      loadState();
-      if (appState.profile) {
-        showAuthOverlay("login");
-        el.loginContact.value = appState.profile.contact || "";
-        el.loginPassword.value = "";
-      } else {
-        showAuthOverlay("register");
-      }
+      showAuthOverlay("login");
+      switchAuthMode("login");
+      el.loginPassword.value = "";
     }
 
-    el.startBtn.addEventListener("click", () => {
+    el.startBtn.addEventListener("click", async () => {
       const profile = {
         name: el.teacherName.value.trim(),
         contact: el.contact.value.trim(),
@@ -985,22 +992,39 @@
         return;
       }
 
-      appState.profile = profile;
-      saveState();
-      el.loginPassword.value = "";
-      openDashboard();
+      try {
+        const out = await apiJson("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(profile)
+        });
+        appState.userId = out.userId || "";
+        appState.profile = out.profile || {
+          name: profile.name,
+          contact: profile.contact,
+          school: profile.school,
+          subject: profile.subject,
+          grades: profile.grades
+        };
+        appState.entries = Array.isArray(out.entries) ? out.entries : [];
+        el.loginPassword.value = "";
+        openDashboard();
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("user_exists")) {
+          alert("هذا الحساب مسجل مسبقًا. استخدم تسجيل الدخول.");
+          switchAuthMode("login");
+          el.loginContact.value = profile.contact;
+        } else {
+          alert("تعذر إنشاء الحساب. تحقق من إعدادات الخادم ثم أعد المحاولة.");
+        }
+      }
     });
 
     el.modeRegisterBtn.addEventListener("click", () => switchAuthMode("register"));
     el.modeLoginBtn.addEventListener("click", () => switchAuthMode("login"));
 
-    el.loginBtn.addEventListener("click", () => {
-      if (!appState.profile) {
-        alert("لا يوجد حساب محفوظ بعد. استخدم تسجيل جديد أولاً.");
-        switchAuthMode("register");
-        return;
-      }
-
+    el.loginBtn.addEventListener("click", async () => {
       const enteredContact = normalizeLoginId(el.loginContact.value);
       const enteredPassword = el.loginPassword.value;
 
@@ -1009,23 +1033,30 @@
         return;
       }
 
-      if (!appState.profile.password) {
-        alert("هذا الحساب محفوظ بدون كلمة مرور. استخدم نسيت كلمة المرور لإنشاء كلمة جديدة.");
-        setRecoveryMode(true);
-        return;
+      try {
+        const out = await apiJson("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact: enteredContact,
+            password: enteredPassword
+          })
+        });
+        appState.userId = out.userId || "";
+        appState.profile = out.profile || null;
+        appState.entries = Array.isArray(out.entries) ? out.entries : [];
+        openDashboard();
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("invalid_credentials")) {
+          alert("بيانات الدخول غير صحيحة.");
+        } else if (reason.includes("not_found")) {
+          alert("الحساب غير موجود. استخدم تسجيل جديد أولاً.");
+          switchAuthMode("register");
+        } else {
+          alert("تعذر تسجيل الدخول. تحقق من الاتصال ثم أعد المحاولة.");
+        }
       }
-
-      if (enteredContact !== normalizeLoginId(appState.profile.contact)) {
-        alert("رقم/إيميل الدخول غير مطابق للحساب المسجل.");
-        return;
-      }
-
-      if (enteredPassword !== appState.profile.password) {
-        alert("كلمة المرور غير صحيحة.");
-        return;
-      }
-
-      openDashboard();
     });
 
     el.forgotBtn.addEventListener("click", () => {
@@ -1033,12 +1064,7 @@
       el.recoveryContact.value = el.loginContact.value.trim();
     });
 
-    el.resetPasswordBtn.addEventListener("click", () => {
-      if (!appState.profile) {
-        alert("لا يوجد حساب محفوظ لاسترجاعه.");
-        return;
-      }
-
+    el.resetPasswordBtn.addEventListener("click", async () => {
       const recoveryContact = normalizeLoginId(el.recoveryContact.value);
       const recoveryName = el.recoveryName.value.trim();
       const newPassword = el.newPassword.value;
@@ -1065,22 +1091,40 @@
         return;
       }
 
-      appState.profile.password = newPassword;
-      saveState();
-      el.loginContact.value = appState.profile.contact || "";
-      el.loginPassword.value = "";
-      setRecoveryMode(false);
-      alert("تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.");
+      try {
+        await apiJson("/api/auth/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact: recoveryContact,
+            name: recoveryName,
+            newPassword
+          })
+        });
+        el.loginContact.value = recoveryContact;
+        el.loginPassword.value = "";
+        setRecoveryMode(false);
+        alert("تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.");
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("not_found")) {
+          alert("الحساب غير موجود.");
+        } else if (reason.includes("name_mismatch")) {
+          alert("اسم المعلم غير مطابق للحساب.");
+        } else {
+          alert("تعذر تحديث كلمة المرور الآن. حاول مرة أخرى.");
+        }
+      }
     });
     el.entryFile.addEventListener("change", () => {
       const file = el.entryFile.files?.[0];
       el.fileNote.textContent = file
-        ? `تم اختيار الملف: ${file.name} (سيتم رفعه إلى Google Drive إذا كان صورة أو فيديو).`
-        : "سيتم رفع الصور والفيديو إلى Google Drive وتخزين رابطها داخل الإنجاز.";
+        ? `تم اختيار الملف: ${file.name} (سيتم رفعه إلى Vercel Storage إذا كان صورة أو فيديو).`
+        : "سيتم رفع الصور والفيديو إلى Vercel Storage وتخزين رابطها داخل الإنجاز.";
     });
 
     el.addEntryBtn.addEventListener("click", async () => {
-      if (!appState.profile) {
+      if (!appState.profile || !appState.userId) {
         alert("يرجى تسجيل الدخول أولاً.");
         return;
       }
@@ -1123,13 +1167,18 @@
             mediaName = uploaded.mediaName || file.name;
           }
         } catch (error) {
-          const reason = String(error?.message || "");
-          if (reason.includes("gas_not_configured")) {
-            alert("تعذر رفع الوسائط: يجب ضبط GAS_WEB_APP_URL في Vercel وربط Google Apps Script.");
+          const packed = String(error?.message || "");
+          const [reason, detail] = packed.split("::");
+          if (reason.includes("blob_not_configured")) {
+            alert("تعذر رفع الوسائط: يجب تفعيل Vercel Blob في المشروع.");
+          } else if (reason.includes("gas_not_configured")) {
+            alert("تعذر رفع الوسائط: يوجد خلل في إعدادات الخادم.");
           } else if (reason.includes("payload_too_large")) {
             alert("حجم الملف أكبر من الحد المسموح في الرفع الحالي.");
+          } else if (detail) {
+            alert(`تعذر رفع الملف إلى Vercel Storage: ${detail}`);
           } else {
-            alert("تعذر رفع الملف إلى Google Drive. جرّب ملفًا أصغر أو أعد المحاولة.");
+            alert("تعذر رفع الملف إلى Vercel Storage. جرّب ملفًا أصغر أو أعد المحاولة.");
           }
           return;
         }
@@ -1146,7 +1195,6 @@
         mediaUrl,
         mediaFileId,
         mediaName,
-        mediaDataUrl,
         createdAt: new Date().toISOString()
       });
 
@@ -1154,19 +1202,39 @@
       el.entryDesc.value = "";
       el.entryTag.value = "";
       el.entryFile.value = "";
-      el.fileNote.textContent = "سيتم رفع الصور والفيديو إلى Google Drive وتخزين رابطها داخل الإنجاز.";
+      el.fileNote.textContent = "سيتم رفع الصور والفيديو إلى Vercel Storage وتخزين رابطها داخل الإنجاز.";
 
-      saveState();
-      computeStats();
-      renderList();
+      try {
+        await savePortfolioRemote();
+        computeStats();
+        renderList();
+      } catch (error) {
+        appState.entries.pop();
+        alert("تعذر حفظ الإنجاز في قاعدة البيانات. أعد المحاولة.");
+      }
     });
 
-    el.clearDataBtn.addEventListener("click", () => {
+    el.clearDataBtn.addEventListener("click", async () => {
       const ok = confirm("هل تريد مسح جميع البيانات؟ لا يمكن التراجع.");
       if (!ok) return;
-      localStorage.removeItem(STORAGE_KEY);
-      location.hash = "";
-      location.reload();
+      if (!appState.userId) {
+        location.hash = "";
+        location.reload();
+        return;
+      }
+      try {
+        await apiJson("/api/portfolio/clear", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: appState.userId })
+        });
+        appState.entries = [];
+        computeStats();
+        renderList();
+        alert("تم مسح بيانات الإنجازات من قاعدة البيانات.");
+      } catch (error) {
+        alert("تعذر مسح البيانات من قاعدة البيانات.");
+      }
     });
 
     el.generateAiBtn.addEventListener("click", generateAiReport);

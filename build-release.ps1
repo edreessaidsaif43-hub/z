@@ -20,7 +20,10 @@ $files = @(
   "start.bat",
   "README.md",
   "DEPLOY_CLOUD_UBUNTU.md",
-  "DEPLOY_VERCEL.md"
+  "DEPLOY_VERCEL.md",
+  "vercel.json",
+  "package.json",
+  ".gitignore"
 )
 
 foreach ($f in $files) {
@@ -35,6 +38,12 @@ $deploySrc = Join-Path $ProjectRoot "deploy"
 $deployDst = Join-Path $ReleasePath "deploy"
 if (Test-Path -LiteralPath $deploySrc) {
   Copy-Item -LiteralPath $deploySrc -Destination $deployDst -Recurse -Force
+}
+
+$apiSrc = Join-Path $ProjectRoot "api"
+$apiDst = Join-Path $ReleasePath "api"
+if (Test-Path -LiteralPath $apiSrc) {
+  Copy-Item -LiteralPath $apiSrc -Destination $apiDst -Recurse -Force
 }
 
 $gasSrc = Join-Path $ProjectRoot "google-apps-script"
