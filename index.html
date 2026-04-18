@@ -320,6 +320,45 @@
 
     .auth-switch { display: flex; gap: 8px; margin-bottom: 12px; }
     .auth-switch .btn.active { background: #0e7c66; color: #fff; }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .admin-list {
+      max-height: 62vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .admin-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfefd;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .admin-item.active {
+      border-color: #96cfc7;
+      background: #eaf8f5;
+    }
+    .admin-item h4 {
+      margin: 0 0 4px;
+      font-size: 0.98rem;
+    }
+    .admin-item small {
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+    .admin-entry {
+      border: 1px solid #d6e5e3;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #fff;
+    }
     .text-link {
       background: transparent;
       border: 0;
@@ -379,6 +418,40 @@
     body.shared-view .no-print {
       display: none !important;
     }
+    body.shared-view .grid {
+      grid-template-columns: 1fr;
+    }
+    body.shared-view main.card {
+      max-width: 980px;
+      width: 100%;
+      margin: 0 auto;
+      border-radius: 18px;
+      border-width: 2px;
+      box-shadow: 0 14px 30px rgba(17, 24, 39, 0.14);
+    }
+    body.shared-view #listArea {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    body.shared-view .item {
+      padding: 16px;
+      margin-bottom: 12px;
+      border-width: 2px;
+      border-radius: 14px;
+    }
+    body.shared-view .item h4 {
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+    }
+    body.shared-view .item p {
+      font-size: 0.98rem;
+      line-height: 1.8;
+    }
+    body.shared-view #statCardLessons,
+    body.shared-view #statCardScore,
+    body.shared-view #statCardProgress {
+      display: none !important;
+    }
 
     body.shared-theme-classic {
       background: radial-gradient(circle at top right, #e7f3ef, var(--bg) 45%);
@@ -426,6 +499,7 @@
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .side-panel { position: static; }
       .list-tools { grid-template-columns: 1fr; }
+      .admin-grid { grid-template-columns: 1fr; }
     }
 
     @media print {
@@ -448,6 +522,7 @@
         <div class="auth-switch">
           <button class="btn btn-secondary" id="modeRegisterBtn" type="button">تسجيل جديد</button>
           <button class="btn btn-secondary" id="modeLoginBtn" type="button">تسجيل دخول</button>
+          <button class="btn btn-secondary" id="adminModeBtn" type="button">لوحة المدير</button>
         </div>
 
         <div id="registerForm">
@@ -530,15 +605,15 @@
         <div class="v" id="statAchievements">0</div>
         <div class="k">عدد الإنجازات</div>
       </div>
-      <div class="stat">
+      <div class="stat" id="statCardLessons">
         <div class="v" id="statLessons">0</div>
         <div class="k">عدد عناصر قسم أخرى</div>
       </div>
-      <div class="stat">
+      <div class="stat" id="statCardScore">
         <div class="v" id="statScore">0%</div>
         <div class="k">تقييم الأداء</div>
       </div>
-      <div class="stat">
+      <div class="stat" id="statCardProgress">
         <div class="v" id="statProgress">0%</div>
         <div class="k">نسبة تقدم الملف</div>
         <div class="progress"><span id="progressBar"></span></div>
@@ -556,6 +631,7 @@
         </div>
         <div class="status-pill" id="workflowHint">ابدأ بإضافة أول إنجاز في القسم المناسب</div>
       </div>
+      <div id="reportBox" class="ai-report" hidden style="margin: 0 16px 10px;"></div>
       <div id="shareBox" class="share-box" hidden style="margin: 0 16px 16px;"></div>
     </section>
 
@@ -632,7 +708,7 @@
             <textarea id="entryDesc" placeholder="اكتب تفاصيل الإنجاز وربطه بالمادة أو المهارة..."></textarea>
           </div>
           <div class="form-row">
-            <label for="entryTag">المهارة / التصنيف</label>
+            <label for="entryTag">الهدف</label>
             <input id="entryTag" placeholder="مثال: STEM / مهارة التفكير الناقد" />
           </div>
           <div class="form-row">
@@ -661,15 +737,113 @@
           </div>
           <div class="tabs" id="tabs"></div>
           <div id="listArea"></div>
-          <div id="reportBox" class="ai-report" hidden></div>
         </div>
       </main>
+    </section>
+  </div>
+
+  <div class="container" id="adminApp" hidden>
+    <section class="hero">
+      <h1>لوحة المدير</h1>
+      <p>عرض الحسابات والمشاركات مع إمكانية التعديل أو الحذف.</p>
+    </section>
+
+    <section class="card" id="adminLoginCard">
+      <div class="head">تسجيل دخول المدير</div>
+      <div class="body" style="max-width:560px;">
+        <div class="form-row">
+          <label for="adminPassword">كلمة مرور المدير</label>
+          <input id="adminPassword" type="password" placeholder="أدخل كلمة مرور ADMIN_PASSWORD" />
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="adminLoginBtn" type="button">دخول لوحة المدير</button>
+          <button class="btn btn-secondary" id="adminBackBtn" type="button">رجوع</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="adminPanel" hidden>
+      <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>إدارة الحسابات والمشاركات</span>
+        <div class="actions">
+          <button class="btn btn-secondary" id="adminRefreshBtn" type="button">تحديث</button>
+          <button class="btn btn-danger" id="adminLogoutBtn" type="button">تسجيل خروج المدير</button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="admin-grid">
+          <div>
+            <div class="form-row">
+              <label for="adminSearchInput">بحث بالحسابات</label>
+              <input id="adminSearchInput" placeholder="اسم المعلم أو البريد الإلكتروني" />
+            </div>
+            <div id="adminAccountsList" class="admin-list"></div>
+          </div>
+          <div>
+            <div id="adminDetailsEmpty" class="empty">اختر حسابًا من القائمة لعرض مشاركاته وتعديلها.</div>
+            <div id="adminDetailsPanel" hidden>
+              <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:10px;">
+                <div class="head">بيانات الحساب</div>
+                <div class="body">
+                  <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+                    <div class="form-row">
+                      <label for="adminEditName">اسم المعلم</label>
+                      <input id="adminEditName" />
+                    </div>
+                    <div class="form-row">
+                      <label for="adminEditContact">البريد الإلكتروني</label>
+                      <input id="adminEditContact" type="email" />
+                    </div>
+                    <div class="form-row">
+                      <label for="adminEditSchool">المدرسة</label>
+                      <input id="adminEditSchool" />
+                    </div>
+                    <div class="form-row">
+                      <label for="adminEditSubject">المادة</label>
+                      <input id="adminEditSubject" />
+                    </div>
+                    <div class="form-row">
+                      <label for="adminEditGrades">الصفوف</label>
+                      <input id="adminEditGrades" />
+                    </div>
+                    <div class="form-row">
+                      <label for="adminEditTheme">الثيم</label>
+                      <select id="adminEditTheme">
+                        <option value="classic">كلاسيكي أخضر</option>
+                        <option value="ocean">أزرق احترافي</option>
+                        <option value="sand">رملي دافئ</option>
+                        <option value="night">ليلي رسمي</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <label for="adminEditNewPassword">كلمة مرور جديدة (اختياري)</label>
+                    <input id="adminEditNewPassword" type="password" placeholder="اتركها فارغة بدون تغيير" />
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-primary" id="adminSaveAccountBtn" type="button">حفظ التعديلات</button>
+                    <button class="btn btn-danger" id="adminDeleteAccountBtn" type="button">حذف الحساب نهائيًا</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card" style="box-shadow:none;border:1px solid var(--line);">
+                <div class="head">المشاركات</div>
+                <div class="body">
+                  <div id="adminEntriesList"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
 
   <script>
     const API_BASE = "";
     const SESSION_KEY = "enjazy_session_v1";
+    const ADMIN_SESSION_KEY = "enjazy_admin_session_v1";
     const sectionNames = {
       daily: "أخرى",
       classroom: "الحصص التطبيقية",
@@ -691,6 +865,14 @@
       sortOrder: "newest"
     };
 
+    const adminState = {
+      password: "",
+      accounts: [],
+      selectedUserId: "",
+      selectedAccount: null,
+      searchTerm: "",
+    };
+
     const el = {
       loginOverlay: document.getElementById("loginOverlay"),
       app: document.getElementById("app"),
@@ -704,6 +886,7 @@
       registerForm: document.getElementById("registerForm"),
       modeRegisterBtn: document.getElementById("modeRegisterBtn"),
       modeLoginBtn: document.getElementById("modeLoginBtn"),
+      adminModeBtn: document.getElementById("adminModeBtn"),
       loginBtn: document.getElementById("loginBtn"),
       loginContact: document.getElementById("loginContact"),
       loginPassword: document.getElementById("loginPassword"),
@@ -754,7 +937,29 @@
       settingsSubject: document.getElementById("settingsSubject"),
       settingsGrades: document.getElementById("settingsGrades"),
       settingsTheme: document.getElementById("settingsTheme"),
-      saveSettingsBtn: document.getElementById("saveSettingsBtn")
+      saveSettingsBtn: document.getElementById("saveSettingsBtn"),
+      adminApp: document.getElementById("adminApp"),
+      adminLoginCard: document.getElementById("adminLoginCard"),
+      adminPanel: document.getElementById("adminPanel"),
+      adminPassword: document.getElementById("adminPassword"),
+      adminLoginBtn: document.getElementById("adminLoginBtn"),
+      adminBackBtn: document.getElementById("adminBackBtn"),
+      adminRefreshBtn: document.getElementById("adminRefreshBtn"),
+      adminLogoutBtn: document.getElementById("adminLogoutBtn"),
+      adminSearchInput: document.getElementById("adminSearchInput"),
+      adminAccountsList: document.getElementById("adminAccountsList"),
+      adminDetailsEmpty: document.getElementById("adminDetailsEmpty"),
+      adminDetailsPanel: document.getElementById("adminDetailsPanel"),
+      adminEditName: document.getElementById("adminEditName"),
+      adminEditContact: document.getElementById("adminEditContact"),
+      adminEditSchool: document.getElementById("adminEditSchool"),
+      adminEditSubject: document.getElementById("adminEditSubject"),
+      adminEditGrades: document.getElementById("adminEditGrades"),
+      adminEditTheme: document.getElementById("adminEditTheme"),
+      adminEditNewPassword: document.getElementById("adminEditNewPassword"),
+      adminSaveAccountBtn: document.getElementById("adminSaveAccountBtn"),
+      adminDeleteAccountBtn: document.getElementById("adminDeleteAccountBtn"),
+      adminEntriesList: document.getElementById("adminEntriesList"),
     };
 
     function normalizeTheme(theme) {
@@ -784,6 +989,223 @@
         throw new Error(`${reason}::${message}`);
       }
       return body;
+    }
+
+    async function adminApiJson(path, options = {}) {
+      if (!adminState.password) {
+        throw new Error("unauthorized::Admin password is missing.");
+      }
+      const headers = { ...(options.headers || {}), "x-admin-password": adminState.password };
+      const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+      let body = {};
+      try { body = await res.json(); } catch (e) {}
+      if (!res.ok) {
+        const reason = body?.error || "api_error";
+        const message = body?.message || "";
+        throw new Error(`${reason}::${message}`);
+      }
+      return body;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;");
+    }
+
+    function enterAdminMode() {
+      el.loginOverlay.hidden = true;
+      el.loginOverlay.classList.add("is-hidden");
+      el.loginOverlay.style.display = "none";
+      el.app.hidden = true;
+      el.adminApp.hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function exitAdminMode() {
+      el.adminApp.hidden = true;
+      if (appState.profile && appState.userId) {
+        openDashboard();
+      } else {
+        showAuthOverlay("login");
+      }
+    }
+
+    function renderAdminAccounts() {
+      const term = adminState.searchTerm.trim().toLowerCase();
+      const rows = adminState.accounts.filter((a) => {
+        const n = String(a?.profile?.name || "").toLowerCase();
+        const c = String(a?.profile?.contact || "").toLowerCase();
+        return !term || n.includes(term) || c.includes(term);
+      });
+
+      if (!rows.length) {
+        el.adminAccountsList.innerHTML = `<div class="empty">لا توجد حسابات مطابقة.</div>`;
+        return;
+      }
+
+      el.adminAccountsList.innerHTML = rows.map((a) => {
+        const active = adminState.selectedUserId === a.userId ? "active" : "";
+        return `
+          <article class="admin-item ${active}" data-admin-user="${escapeHtml(a.userId)}">
+            <h4>${escapeHtml(a?.profile?.name || "بدون اسم")}</h4>
+            <small>${escapeHtml(a?.profile?.contact || "-")}</small>
+            <small>عدد المشاركات: ${Number(a.entriesCount || 0)}</small>
+            <small>آخر تحديث: ${fmtDate(a.updatedAt || new Date().toISOString())}</small>
+          </article>
+        `;
+      }).join("");
+
+      el.adminAccountsList.querySelectorAll("[data-admin-user]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-admin-user");
+          await loadAdminAccountDetails(id);
+        });
+      });
+    }
+
+    function renderAdminEntriesEditor() {
+      const entries = Array.isArray(adminState.selectedAccount?.entries) ? adminState.selectedAccount.entries : [];
+      if (!entries.length) {
+        el.adminEntriesList.innerHTML = `<div class="empty">لا توجد مشاركات لهذا الحساب.</div>`;
+        return;
+      }
+
+      el.adminEntriesList.innerHTML = entries.map((item, idx) => {
+        return `
+          <article class="admin-entry" data-entry-idx="${idx}">
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="form-row">
+                <label>القسم</label>
+                <select data-field="section">
+                  ${Object.entries(sectionNames).map(([k, v]) => `<option value="${k}" ${item.section === k ? "selected" : ""}>${v}</option>`).join("")}
+                </select>
+              </div>
+              <div class="form-row">
+                <label>العنوان</label>
+                <input data-field="title" value="${escapeHtml(item.title || "")}" />
+              </div>
+            </div>
+            <div class="form-row">
+              <label>الوصف</label>
+              <textarea data-field="description">${escapeHtml(item.description || "")}</textarea>
+            </div>
+            <div class="form-row">
+              <label>الهدف</label>
+              <input data-field="tag" value="${escapeHtml(item.tag || "")}" />
+            </div>
+            <small>تاريخ الإضافة: ${fmtDate(item.createdAt || new Date().toISOString())}</small>
+            <div class="actions" style="margin-top:8px;">
+              <button class="btn btn-primary" data-entry-save="${idx}" type="button">حفظ المشاركة</button>
+              <button class="btn btn-danger" data-entry-delete="${idx}" type="button">حذف المشاركة</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      el.adminEntriesList.querySelectorAll("[data-entry-save]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const idx = Number(btn.getAttribute("data-entry-save"));
+          const wrapper = el.adminEntriesList.querySelector(`[data-entry-idx="${idx}"]`);
+          if (!wrapper) return;
+          const entry = adminState.selectedAccount.entries[idx];
+          if (!entry) return;
+          entry.section = String(wrapper.querySelector('[data-field="section"]')?.value || entry.section || "daily");
+          entry.title = String(wrapper.querySelector('[data-field="title"]')?.value || "").trim();
+          entry.description = String(wrapper.querySelector('[data-field="description"]')?.value || "").trim();
+          entry.tag = String(wrapper.querySelector('[data-field="tag"]')?.value || "").trim();
+          entry.updatedAt = new Date().toISOString();
+          await saveAdminAccountChanges();
+        });
+      });
+
+      el.adminEntriesList.querySelectorAll("[data-entry-delete]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const idx = Number(btn.getAttribute("data-entry-delete"));
+          const ok = confirm("هل تريد حذف هذه المشاركة؟");
+          if (!ok) return;
+          adminState.selectedAccount.entries = adminState.selectedAccount.entries.filter((_, i) => i !== idx);
+          await saveAdminAccountChanges();
+        });
+      });
+    }
+
+    function renderAdminDetails() {
+      const account = adminState.selectedAccount;
+      if (!account) {
+        el.adminDetailsEmpty.hidden = false;
+        el.adminDetailsPanel.hidden = true;
+        return;
+      }
+      el.adminDetailsEmpty.hidden = true;
+      el.adminDetailsPanel.hidden = false;
+      el.adminEditName.value = account.profile?.name || "";
+      el.adminEditContact.value = account.profile?.contact || "";
+      el.adminEditSchool.value = account.profile?.school || "";
+      el.adminEditSubject.value = account.profile?.subject || "";
+      el.adminEditGrades.value = account.profile?.grades || "";
+      el.adminEditTheme.value = normalizeTheme(account.profile?.shareTheme || "classic");
+      el.adminEditNewPassword.value = "";
+      renderAdminEntriesEditor();
+    }
+
+    async function loadAdminAccounts() {
+      const out = await adminApiJson("/api/admin/accounts", { method: "GET" });
+      adminState.accounts = Array.isArray(out.accounts) ? out.accounts : [];
+      renderAdminAccounts();
+    }
+
+    async function loadAdminAccountDetails(userId) {
+      if (!userId) return;
+      const data = await adminApiJson(`/api/admin/account?userId=${encodeURIComponent(userId)}`, { method: "GET" });
+      adminState.selectedUserId = userId;
+      adminState.selectedAccount = {
+        userId: data.userId,
+        profile: data.profile || {},
+        entries: Array.isArray(data.entries) ? data.entries : [],
+      };
+      renderAdminAccounts();
+      renderAdminDetails();
+    }
+
+    async function saveAdminAccountChanges() {
+      const account = adminState.selectedAccount;
+      if (!account?.userId) return;
+      const payload = {
+        userId: account.userId,
+        profile: account.profile,
+        entries: account.entries,
+      };
+      await adminApiJson("/api/admin/account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await loadAdminAccounts();
+      await loadAdminAccountDetails(account.userId);
+      alert("تم حفظ التعديلات بنجاح.");
+    }
+
+    async function runAdminLogin() {
+      const pwd = String(el.adminPassword.value || "");
+      if (!pwd) {
+        alert("يرجى إدخال كلمة مرور المدير.");
+        return;
+      }
+      const out = await apiJson("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwd }),
+      });
+      if (!out?.ok) throw new Error("unauthorized");
+      adminState.password = pwd;
+      sessionStorage.setItem(ADMIN_SESSION_KEY, pwd);
+      el.adminLoginCard.hidden = true;
+      el.adminPanel.hidden = false;
+      await loadAdminAccounts();
+      renderAdminDetails();
     }
 
     async function savePortfolioRemote() {
@@ -1054,7 +1476,7 @@
 
       const renderItem = (item) => {
         const filePart = item.fileName ? `<small>ملف مرفق: ${item.fileName}</small>` : "";
-        const tagPart = item.tag ? `<small>تصنيف/مهارة: ${item.tag}</small>` : "";
+        const tagPart = item.tag ? `<small>الهدف: ${item.tag}</small>` : "";
         const deleteBtn = appState.isSharedView ? "" : `<button class="btn btn-danger" data-delete="${item.id}">حذف</button>`;
         const editBtn = appState.isSharedView ? "" : `<button class="btn btn-secondary" data-edit="${item.id}">تعديل</button>`;
         let mediaPart = "";
@@ -1166,6 +1588,7 @@
 
       el.reportBox.hidden = false;
       el.reportBox.textContent = report;
+      el.reportBox.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function applySharedPortfolio(decoded) {
@@ -1375,6 +1798,24 @@
 
     el.modeRegisterBtn.addEventListener("click", () => switchAuthMode("register"));
     el.modeLoginBtn.addEventListener("click", () => switchAuthMode("login"));
+    el.adminModeBtn.addEventListener("click", async () => {
+      enterAdminMode();
+      el.adminPanel.hidden = true;
+      el.adminLoginCard.hidden = false;
+      const saved = String(sessionStorage.getItem(ADMIN_SESSION_KEY) || "");
+      if (saved) {
+        el.adminPassword.value = saved;
+        adminState.password = saved;
+        try {
+          await runAdminLogin();
+        } catch (e) {
+          sessionStorage.removeItem(ADMIN_SESSION_KEY);
+          adminState.password = "";
+          el.adminPanel.hidden = true;
+          el.adminLoginCard.hidden = false;
+        }
+      }
+    });
 
     el.loginBtn.addEventListener("click", async () => {
       const enteredContact = normalizeLoginId(el.loginContact.value);
@@ -1664,6 +2105,112 @@
     el.sortOrder.addEventListener("change", () => {
       appState.sortOrder = String(el.sortOrder.value || "newest");
       renderList();
+    });
+
+    el.adminBackBtn.addEventListener("click", () => {
+      exitAdminMode();
+    });
+    el.adminLoginBtn.addEventListener("click", async () => {
+      try {
+        await runAdminLogin();
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("admin_not_configured")) {
+          alert("ADMIN_PASSWORD غير مضبوط في Vercel.");
+        } else {
+          alert("تعذر تسجيل دخول المدير. تحقق من كلمة المرور.");
+        }
+      }
+    });
+    el.adminRefreshBtn.addEventListener("click", async () => {
+      try {
+        await loadAdminAccounts();
+        if (adminState.selectedUserId) {
+          await loadAdminAccountDetails(adminState.selectedUserId);
+        }
+      } catch (error) {
+        alert("تعذر تحديث بيانات المدير.");
+      }
+    });
+    el.adminLogoutBtn.addEventListener("click", () => {
+      const ok = confirm("هل تريد تسجيل خروج المدير؟");
+      if (!ok) return;
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      adminState.password = "";
+      adminState.accounts = [];
+      adminState.selectedUserId = "";
+      adminState.selectedAccount = null;
+      adminState.searchTerm = "";
+      el.adminSearchInput.value = "";
+      el.adminAccountsList.innerHTML = "";
+      el.adminEntriesList.innerHTML = "";
+      el.adminPanel.hidden = true;
+      el.adminLoginCard.hidden = false;
+      el.adminPassword.value = "";
+      alert("تم تسجيل خروج المدير.");
+    });
+    el.adminSearchInput.addEventListener("input", () => {
+      adminState.searchTerm = String(el.adminSearchInput.value || "");
+      renderAdminAccounts();
+    });
+    el.adminSaveAccountBtn.addEventListener("click", async () => {
+      if (!adminState.selectedAccount?.userId) return;
+      adminState.selectedAccount.profile = {
+        ...adminState.selectedAccount.profile,
+        name: String(el.adminEditName.value || "").trim(),
+        contact: normalizeLoginId(el.adminEditContact.value),
+        school: String(el.adminEditSchool.value || "").trim(),
+        subject: String(el.adminEditSubject.value || "").trim(),
+        grades: String(el.adminEditGrades.value || "").trim(),
+        shareTheme: normalizeTheme(el.adminEditTheme.value),
+      };
+      const newPassword = String(el.adminEditNewPassword.value || "");
+      const payload = {
+        userId: adminState.selectedAccount.userId,
+        profile: adminState.selectedAccount.profile,
+        entries: adminState.selectedAccount.entries,
+        newPassword,
+      };
+      try {
+        await adminApiJson("/api/admin/account", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        el.adminEditNewPassword.value = "";
+        await loadAdminAccounts();
+        await loadAdminAccountDetails(adminState.selectedAccount.userId);
+        alert("تم حفظ الحساب بنجاح.");
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("contact_exists")) {
+          alert("البريد الإلكتروني مستخدم في حساب آخر.");
+        } else {
+          alert("تعذر حفظ الحساب.");
+        }
+      }
+    });
+    el.adminDeleteAccountBtn.addEventListener("click", async () => {
+      if (!adminState.selectedAccount?.userId) return;
+      const ok = confirm("هل تريد حذف الحساب وجميع مشاركاته نهائيًا؟");
+      if (!ok) return;
+      try {
+        await adminApiJson("/api/admin/account", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "delete",
+            userId: adminState.selectedAccount.userId,
+          }),
+        });
+        adminState.selectedUserId = "";
+        adminState.selectedAccount = null;
+        renderAdminDetails();
+        await loadAdminAccounts();
+        alert("تم حذف الحساب نهائيًا.");
+      } catch (error) {
+        alert("تعذر حذف الحساب.");
+      }
     });
 
     init();
