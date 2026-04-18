@@ -1,0 +1,1498 @@
+﻿<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ملف إنجاز المعلم العماني</title>
+  <style>
+    :root {
+      --bg: #f4f7f6;
+      --card: #ffffff;
+      --ink: #183a37;
+      --muted: #5b716f;
+      --line: #d7e2e1;
+      --brand: #0e7c66;
+      --brand-2: #1a9b84;
+      --accent: #f0b429;
+      --danger: #b42318;
+      --radius: 16px;
+      --shadow: 0 10px 25px rgba(24, 58, 55, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #e7f3ef, var(--bg) 45%);
+      color: var(--ink);
+    }
+
+    .container {
+      width: min(1200px, 94vw);
+      margin-inline: auto;
+      padding: 24px 0 40px;
+    }
+
+    .hero {
+      background: linear-gradient(140deg, #0f6254, #137a67);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 2vw, 2rem);
+    }
+
+    .hero p {
+      margin: 0;
+      opacity: 0.95;
+      line-height: 1.8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .card .head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .card .body {
+      padding: 16px 18px;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #bfd2cf;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    textarea { min-height: 86px; resize: vertical; }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary { background: var(--brand); color: #fff; }
+    .btn-secondary { background: #ecf5f3; color: var(--ink); }
+    .btn-accent { background: var(--accent); color: #3b2d06; }
+    .btn-danger { background: #fbe9e8; color: var(--danger); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .settings-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .stat .v { font-size: 1.45rem; font-weight: 800; }
+    .stat .k { color: var(--muted); font-size: 0.86rem; }
+
+    .progress {
+      background: #e9f1f0;
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      width: 0;
+      transition: width 0.4s ease;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .tab.active {
+      background: #e3f4f1;
+      border-color: #9dcfca;
+      color: #0d5f50;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #fcfefe;
+    }
+
+    .item h4 {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+    }
+
+    .item p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: #2f4c49;
+    }
+
+    .item small {
+      color: var(--muted);
+      display: block;
+      margin-top: 7px;
+    }
+
+    .item .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #b7cac7;
+      border-radius: 12px;
+      padding: 18px;
+      background: #f9fcfc;
+    }
+
+    .ai-report {
+      white-space: pre-wrap;
+      line-height: 1.85;
+      background: #f9fffd;
+      border: 1px solid #bfe0da;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    .share-box {
+      margin-top: 10px;
+      background: #f6faf9;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      word-break: break-all;
+      font-size: 0.9rem;
+    }
+
+    .file-note {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 32, 29, 0.48);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 999;
+    }
+
+    .is-hidden { display: none !important; }
+
+    .login-box {
+      width: min(560px, 100%);
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #d4e2e0;
+      box-shadow: 0 20px 55px rgba(12, 45, 41, 0.2);
+      overflow: hidden;
+    }
+
+    .login-head {
+      background: linear-gradient(130deg, #0b5f4f, #16967c);
+      color: #fff;
+      padding: 16px 18px;
+    }
+
+    .login-head h2 { margin: 0 0 5px; font-size: 1.12rem; }
+    .login-head p { margin: 0; font-size: 0.9rem; opacity: 0.92; }
+
+    .auth-switch { display: flex; gap: 8px; margin-bottom: 12px; }
+    .auth-switch .btn.active { background: #0e7c66; color: #fff; }
+    .text-link {
+      background: transparent;
+      border: 0;
+      color: #0e7c66;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 2px 0;
+      text-decoration: underline;
+      margin-top: 6px;
+    }
+    .muted-note { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+    .media-wrap {
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #d9e5e3;
+      background: #fff;
+    }
+    .media-wrap img,
+    .media-wrap video {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      display: block;
+      background: #0b2421;
+    }
+    .section-block {
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #d5e5e2;
+      border-radius: 14px;
+      background: #fbfefd;
+    }
+    .section-title {
+      margin: 0 0 10px;
+      color: #0f6254;
+      font-size: 1.02rem;
+      border-bottom: 1px solid #d7e8e5;
+      padding-bottom: 8px;
+    }
+    .shared-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #a9d0ca;
+      background: #e7f5f2;
+      color: #0f6254;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    body.shared-view .side-panel,
+    body.shared-view .form-block,
+    body.shared-view .actions,
+    body.shared-view .tabs {
+      display: none !important;
+    }
+    body.shared-view .no-print {
+      display: none !important;
+    }
+
+    body.shared-theme-classic {
+      background: radial-gradient(circle at top right, #e7f3ef, var(--bg) 45%);
+    }
+    body.shared-theme-ocean {
+      background: radial-gradient(circle at top left, #e6f2ff, #f5f9ff 50%);
+    }
+    body.shared-theme-ocean .hero {
+      background: linear-gradient(140deg, #0a4f8a, #1f74b8);
+    }
+    body.shared-theme-sand {
+      background: radial-gradient(circle at top left, #fff4e6, #fffaf3 55%);
+    }
+    body.shared-theme-sand .hero {
+      background: linear-gradient(140deg, #8a5a2b, #c4833a);
+    }
+    body.shared-theme-night {
+      background: radial-gradient(circle at top right, #162233, #0e1624 55%);
+      color: #e8f0ff;
+    }
+    body.shared-theme-night .card {
+      background: #16253a;
+      border-color: #24364f;
+      color: #e8f0ff;
+    }
+    body.shared-theme-night .hero {
+      background: linear-gradient(140deg, #1a2f4d, #243f67);
+    }
+    body.shared-theme-night .stat {
+      background: #192a41;
+      border-color: #2b3f5b;
+    }
+    body.shared-theme-night .item {
+      background: #1a2a42;
+      border-color: #2b3f5b;
+    }
+    body.shared-theme-night .item p,
+    body.shared-theme-night .item small,
+    body.shared-theme-night .k {
+      color: #bfd0ea;
+    }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media print {
+      .login-overlay, .side-panel, .tabs, .actions, .form-block, .no-print { display: none !important; }
+      body { background: #fff; }
+      .container { width: 100%; padding: 0; }
+      .hero { box-shadow: none; }
+      .card { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+      <div class="login-head">
+        <h2 id="authTitle">تسجيل جديد للمعلم</h2>
+        <p id="authHint">ابدأ ملف الإنجاز الإلكتروني الخاص بك بخطوات بسيطة.</p>
+      </div>
+      <div class="body" style="padding:16px 18px;">
+        <div class="auth-switch">
+          <button class="btn btn-secondary" id="modeRegisterBtn" type="button">تسجيل جديد</button>
+          <button class="btn btn-secondary" id="modeLoginBtn" type="button">تسجيل دخول</button>
+        </div>
+
+        <div id="registerForm">
+          <div class="form-row">
+            <label for="teacherName">اسم المعلم</label>
+            <input id="teacherName" placeholder="مثال: أ. أحمد الرواحي" />
+          </div>
+          <div class="form-row">
+            <label for="contact">البريد الإلكتروني (نفس نموذج m.html)</label>
+            <input id="contact" type="email" placeholder="teacher@mail.com" />
+          </div>
+          <div class="form-row">
+            <label for="school">المدرسة</label>
+            <input id="school" placeholder="اسم المدرسة" />
+          </div>
+          <div class="form-row">
+            <label for="subject">المادة</label>
+            <input id="subject" placeholder="مثال: الرياضيات" />
+          </div>
+          <div class="form-row">
+            <label for="grades">الصفوف</label>
+            <input id="grades" placeholder="مثال: الخامس، السادس" />
+          </div>
+          <div class="form-row">
+            <label for="registerPassword">كلمة المرور</label>
+            <input id="registerPassword" type="password" placeholder="أدخل كلمة مرور للحساب" />
+          </div>
+          <div class="form-row">
+            <label for="registerPasswordConfirm">تأكيد كلمة المرور</label>
+            <input id="registerPasswordConfirm" type="password" placeholder="أعد إدخال كلمة المرور" />
+          </div>
+          <button class="btn btn-primary" id="startBtn" type="button">حفظ الحساب ودخول اللوحة</button>
+        </div>
+
+        <div id="loginForm" hidden>
+          <div class="form-row">
+            <label for="loginContact">البريد الإلكتروني</label>
+            <input id="loginContact" type="email" placeholder="أدخل نفس الإيميل المسجل" />
+          </div>
+          <div class="form-row">
+            <label for="loginPassword">كلمة المرور</label>
+            <input id="loginPassword" type="password" placeholder="أدخل كلمة المرور" />
+          </div>
+          <button class="btn btn-primary" id="loginBtn" type="button">دخول لوحة التحكم</button>
+          <button class="text-link" id="forgotBtn" type="button">نسيت كلمة المرور؟</button>
+
+          <div id="recoveryForm" hidden>
+            <div class="form-row">
+              <label for="recoveryContact">البريد الإلكتروني للحساب</label>
+              <input id="recoveryContact" type="email" placeholder="نفس الإيميل المسجل" />
+            </div>
+            <div class="form-row">
+              <label for="recoveryName">اسم المعلم (اختياري للتأكيد)</label>
+              <input id="recoveryName" placeholder="مثال: أ. أحمد الرواحي" />
+            </div>
+            <div class="form-row">
+              <label for="newPassword">كلمة مرور جديدة</label>
+              <input id="newPassword" type="password" placeholder="أدخل كلمة المرور الجديدة" />
+            </div>
+            <div class="form-row">
+              <label for="newPasswordConfirm">تأكيد كلمة المرور الجديدة</label>
+              <input id="newPasswordConfirm" type="password" placeholder="أعد إدخال كلمة المرور الجديدة" />
+            </div>
+            <button class="btn btn-secondary" id="resetPasswordBtn" type="button">تحديث كلمة المرور</button>
+            <div class="muted-note">في النسخة الحالية يتم الاسترجاع بالتحقق من رقم/إيميل الحساب.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="app" hidden>
+    <section class="hero">
+      <h1 id="heroTitle">ملف إنجاز المعلم العماني</h1>
+      <p id="heroMeta"></p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="v" id="statAchievements">0</div>
+        <div class="k">عدد الإنجازات</div>
+      </div>
+      <div class="stat">
+        <div class="v" id="statLessons">0</div>
+        <div class="k">عدد الدروس</div>
+      </div>
+      <div class="stat">
+        <div class="v" id="statScore">0%</div>
+        <div class="k">تقييم الأداء</div>
+      </div>
+      <div class="stat">
+        <div class="v" id="statProgress">0%</div>
+        <div class="k">نسبة تقدم الملف</div>
+        <div class="progress"><span id="progressBar"></span></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="card side-panel">
+        <div class="head">إضافة إنجاز جديد</div>
+        <div class="body">
+          <div class="form-row">
+            <label for="sectionType">القسم</label>
+            <select id="sectionType">
+              <option value="daily">التحضير اليومي</option>
+              <option value="classroom">الأنشطة الصفية</option>
+              <option value="initiatives">المبادرات والمشاريع</option>
+              <option value="certificates">الإنجازات والشهادات</option>
+              <option value="professional">التطوير المهني</option>
+              <option value="students">إنجازات الطلاب</option>
+              <option value="parents">التواصل مع ولي الأمر</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="entryTitle">العنوان</label>
+            <input id="entryTitle" placeholder="عنوان الإنجاز أو النشاط" />
+          </div>
+          <div class="form-row">
+            <label for="entryDesc">الوصف</label>
+            <textarea id="entryDesc" placeholder="اكتب تفاصيل الإنجاز وربطه بالمادة أو المهارة..."></textarea>
+          </div>
+          <div class="form-row">
+            <label for="entryTag">المهارة / التصنيف</label>
+            <input id="entryTag" placeholder="مثال: STEM / مهارة التفكير الناقد" />
+          </div>
+          <div class="form-row">
+            <label for="entryFile">ملف داعم (اختياري)</label>
+            <input id="entryFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.mp4,.doc,.docx" />
+            <div class="file-note" id="fileNote">لن يتم رفع الملف للخادم في هذه النسخة، يتم حفظ اسم الملف كمرجع.</div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="addEntryBtn">حفظ الإنجاز</button>
+            <button class="btn btn-secondary" id="cancelEditBtn" type="button" hidden>إلغاء التعديل</button>
+            <button class="btn btn-danger" id="clearDataBtn">مسح كل البيانات</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="card">
+        <div class="head">لوحة الملف</div>
+        <div class="body">
+          <div class="tabs" id="tabs"></div>
+          <div id="listArea"></div>
+
+          <div class="form-block no-print" style="margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
+            <div class="actions">
+              <button class="btn btn-accent" id="generateAiBtn">توليد ملف إنجاز ذكي (AI)</button>
+              <button class="btn btn-secondary" id="downloadPdfBtn">تحميل PDF</button>
+              <button class="btn btn-secondary" id="shareBtn">إنشاء رابط مباشر</button>
+              <button class="btn btn-secondary settings-toggle" id="settingsToggleBtn" type="button"><span>⚙️</span><span>الضبط</span></button>
+            </div>
+            <div id="reportBox" class="ai-report" hidden></div>
+            <div id="shareBox" class="share-box" hidden></div>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <section class="card no-print" id="settingsPanel" style="margin-top:16px;" hidden>
+      <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>قسم الضبط</span>
+        <button class="btn btn-secondary" id="closeSettingsBtn" type="button">إغلاق</button>
+      </div>
+      <div class="body">
+        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+          <div class="form-row">
+            <label for="settingsName">اسم المعلم</label>
+            <input id="settingsName" placeholder="تعديل اسم المعلم" />
+          </div>
+          <div class="form-row">
+            <label for="settingsContact">البريد الإلكتروني</label>
+            <input id="settingsContact" type="email" placeholder="teacher@mail.com" />
+          </div>
+          <div class="form-row">
+            <label for="settingsSchool">المدرسة</label>
+            <input id="settingsSchool" placeholder="اسم المدرسة" />
+          </div>
+          <div class="form-row">
+            <label for="settingsSubject">المادة</label>
+            <input id="settingsSubject" placeholder="مثال: الرياضيات" />
+          </div>
+          <div class="form-row">
+            <label for="settingsGrades">الصفوف</label>
+            <input id="settingsGrades" placeholder="مثال: الخامس، السادس" />
+          </div>
+          <div class="form-row">
+            <label for="settingsTheme">ثيم عرض المشاركة</label>
+            <select id="settingsTheme">
+              <option value="classic">كلاسيكي أخضر</option>
+              <option value="ocean">أزرق احترافي</option>
+              <option value="sand">رملي دافئ</option>
+              <option value="night">ليلي رسمي</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="saveSettingsBtn" type="button">حفظ إعدادات الملف الشخصي</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = "";
+    const sectionNames = {
+      daily: "التحضير اليومي",
+      classroom: "الأنشطة الصفية",
+      initiatives: "المبادرات والمشاريع",
+      certificates: "الإنجازات والشهادات",
+      professional: "التطوير المهني",
+      students: "إنجازات الطلاب",
+      parents: "التواصل مع ولي الأمر"
+    };
+
+    const appState = {
+      userId: "",
+      profile: null,
+      entries: [],
+      activeTab: "all",
+      isSharedView: false,
+      editingEntryId: ""
+    };
+
+    const el = {
+      loginOverlay: document.getElementById("loginOverlay"),
+      app: document.getElementById("app"),
+      teacherName: document.getElementById("teacherName"),
+      contact: document.getElementById("contact"),
+      school: document.getElementById("school"),
+      subject: document.getElementById("subject"),
+      grades: document.getElementById("grades"),
+      startBtn: document.getElementById("startBtn"),
+      loginForm: document.getElementById("loginForm"),
+      registerForm: document.getElementById("registerForm"),
+      modeRegisterBtn: document.getElementById("modeRegisterBtn"),
+      modeLoginBtn: document.getElementById("modeLoginBtn"),
+      loginBtn: document.getElementById("loginBtn"),
+      loginContact: document.getElementById("loginContact"),
+      loginPassword: document.getElementById("loginPassword"),
+      forgotBtn: document.getElementById("forgotBtn"),
+      recoveryForm: document.getElementById("recoveryForm"),
+      recoveryContact: document.getElementById("recoveryContact"),
+      recoveryName: document.getElementById("recoveryName"),
+      newPassword: document.getElementById("newPassword"),
+      newPasswordConfirm: document.getElementById("newPasswordConfirm"),
+      resetPasswordBtn: document.getElementById("resetPasswordBtn"),
+      registerPassword: document.getElementById("registerPassword"),
+      registerPasswordConfirm: document.getElementById("registerPasswordConfirm"),
+      authTitle: document.getElementById("authTitle"),
+      authHint: document.getElementById("authHint"),
+      heroTitle: document.getElementById("heroTitle"),
+      heroMeta: document.getElementById("heroMeta"),
+      sectionType: document.getElementById("sectionType"),
+      entryTitle: document.getElementById("entryTitle"),
+      entryDesc: document.getElementById("entryDesc"),
+      entryTag: document.getElementById("entryTag"),
+      entryFile: document.getElementById("entryFile"),
+      fileNote: document.getElementById("fileNote"),
+      addEntryBtn: document.getElementById("addEntryBtn"),
+      cancelEditBtn: document.getElementById("cancelEditBtn"),
+      clearDataBtn: document.getElementById("clearDataBtn"),
+      tabs: document.getElementById("tabs"),
+      listArea: document.getElementById("listArea"),
+      reportBox: document.getElementById("reportBox"),
+      shareBox: document.getElementById("shareBox"),
+      generateAiBtn: document.getElementById("generateAiBtn"),
+      downloadPdfBtn: document.getElementById("downloadPdfBtn"),
+      shareBtn: document.getElementById("shareBtn"),
+      settingsToggleBtn: document.getElementById("settingsToggleBtn"),
+      settingsPanel: document.getElementById("settingsPanel"),
+      closeSettingsBtn: document.getElementById("closeSettingsBtn"),
+      statAchievements: document.getElementById("statAchievements"),
+      statLessons: document.getElementById("statLessons"),
+      statScore: document.getElementById("statScore"),
+      statProgress: document.getElementById("statProgress"),
+      progressBar: document.getElementById("progressBar"),
+      settingsName: document.getElementById("settingsName"),
+      settingsContact: document.getElementById("settingsContact"),
+      settingsSchool: document.getElementById("settingsSchool"),
+      settingsSubject: document.getElementById("settingsSubject"),
+      settingsGrades: document.getElementById("settingsGrades"),
+      settingsTheme: document.getElementById("settingsTheme"),
+      saveSettingsBtn: document.getElementById("saveSettingsBtn")
+    };
+
+    function normalizeTheme(theme) {
+      const key = String(theme || "").trim().toLowerCase();
+      if (["classic", "ocean", "sand", "night"].includes(key)) return key;
+      return "classic";
+    }
+
+    function applyShareTheme(theme) {
+      const selected = normalizeTheme(theme);
+      document.body.classList.remove(
+        "shared-theme-classic",
+        "shared-theme-ocean",
+        "shared-theme-sand",
+        "shared-theme-night"
+      );
+      document.body.classList.add(`shared-theme-${selected}`);
+    }
+
+    async function apiJson(path, options = {}) {
+      const res = await fetch(`${API_BASE}${path}`, options);
+      let body = {};
+      try { body = await res.json(); } catch (e) {}
+      if (!res.ok) {
+        const reason = body?.error || "api_error";
+        const message = body?.message || "";
+        throw new Error(`${reason}::${message}`);
+      }
+      return body;
+    }
+
+    async function savePortfolioRemote() {
+      if (!appState.userId || !appState.profile) return;
+      await apiJson("/api/portfolio/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: appState.userId,
+          profile: appState.profile,
+          entries: appState.entries
+        })
+      });
+    }
+
+    function fmtDate(iso) {
+      return new Date(iso).toLocaleString("ar-OM", { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    async function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("file_read_failed"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadMediaToBackend(file, kind) {
+      const dataUrl = await readFileAsDataUrl(file);
+      const base64Data = String(dataUrl).split(",")[1] || "";
+      const res = await fetch(`${API_BASE}/api/media/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          mimeType: file.type,
+          base64Data,
+          kind
+        })
+      });
+
+      if (!res.ok) {
+        let details = {};
+        try { details = await res.json(); } catch (e) {}
+        const reason = details?.error || "media_upload_failed";
+        const message = details?.message || "";
+        throw new Error(`${reason}::${message}`);
+      }
+      return res.json();
+    }
+
+    function updateHeader() {
+      const p = appState.profile;
+      if (!p) return;
+      el.heroTitle.textContent = `ملف إنجاز ${p.name}`;
+      el.heroMeta.textContent = `${p.school} | المادة: ${p.subject} | الصفوف: ${p.grades}`;
+      applyShareTheme(p.shareTheme || "classic");
+    }
+
+    function setSettingsPanel(open) {
+      const shouldOpen = !!open && !appState.isSharedView;
+      el.settingsPanel.hidden = !shouldOpen;
+      if (el.settingsToggleBtn) {
+        el.settingsToggleBtn.textContent = shouldOpen ? "⚙️ إخفاء الضبط" : "⚙️ الضبط";
+      }
+    }
+
+    function fillSettingsFromProfile() {
+      const p = appState.profile || {};
+      el.settingsName.value = p.name || "";
+      el.settingsContact.value = p.contact || "";
+      el.settingsSchool.value = p.school || "";
+      el.settingsSubject.value = p.subject || "";
+      el.settingsGrades.value = p.grades || "";
+      el.settingsTheme.value = normalizeTheme(p.shareTheme || "classic");
+    }
+
+    function resetEntryForm() {
+      appState.editingEntryId = "";
+      el.sectionType.value = "daily";
+      el.entryTitle.value = "";
+      el.entryDesc.value = "";
+      el.entryTag.value = "";
+      el.entryFile.value = "";
+      el.fileNote.textContent = "سيتم رفع الصور والفيديو إلى Vercel Storage وتخزين رابطها داخل الإنجاز.";
+      el.addEntryBtn.textContent = "حفظ الإنجاز";
+      el.cancelEditBtn.hidden = true;
+    }
+
+    function normalizeLoginId(value) {
+      return (value || "").trim().toLowerCase();
+    }
+
+    function setRecoveryMode(show) {
+      el.recoveryForm.hidden = !show;
+      if (!show) {
+        el.recoveryContact.value = "";
+        el.recoveryName.value = "";
+        el.newPassword.value = "";
+        el.newPasswordConfirm.value = "";
+      }
+    }
+
+    function switchAuthMode(mode) {
+      const isLogin = mode === "login";
+      el.registerForm.hidden = isLogin;
+      el.loginForm.hidden = !isLogin;
+      el.modeRegisterBtn.classList.toggle("active", !isLogin);
+      el.modeLoginBtn.classList.toggle("active", isLogin);
+      el.authTitle.textContent = isLogin ? "تسجيل دخول المعلم" : "تسجيل جديد للمعلم";
+      el.authHint.textContent = isLogin
+        ? "أدخل رقم/إيميل الحساب مع كلمة المرور لفتح لوحة التحكم."
+        : "أنشئ الحساب مرة واحدة ثم استخدم تسجيل الدخول لاحقًا.";
+      setRecoveryMode(false);
+    }
+
+    function openDashboard() {
+      appState.isSharedView = false;
+      document.body.classList.remove("shared-view");
+      el.loginOverlay.hidden = true;
+      el.loginOverlay.classList.add("is-hidden");
+      el.loginOverlay.style.display = "none";
+      el.app.hidden = false;
+      updateHeader();
+      fillSettingsFromProfile();
+      setSettingsPanel(false);
+      renderTabs();
+      renderList();
+      computeStats();
+    }
+
+    function showAuthOverlay(mode) {
+      el.loginOverlay.hidden = false;
+      el.loginOverlay.classList.remove("is-hidden");
+      el.loginOverlay.style.display = "flex";
+      el.app.hidden = true;
+      setSettingsPanel(false);
+      switchAuthMode(mode);
+    }
+
+    function computeStats() {
+      const total = appState.entries.length;
+      const lessons = appState.entries.filter(e => e.section === "daily").length;
+      const coverage = Object.keys(sectionNames).filter(s => appState.entries.some(e => e.section === s)).length;
+      const progress = Math.round((coverage / Object.keys(sectionNames).length) * 100);
+      const performance = Math.min(100, Math.round(total * 8 + coverage * 6));
+
+      el.statAchievements.textContent = String(total);
+      el.statLessons.textContent = String(lessons);
+      el.statScore.textContent = `${performance}%`;
+      el.statProgress.textContent = `${progress}%`;
+      el.progressBar.style.width = `${progress}%`;
+    }
+
+    function renderTabs() {
+      const tabs = [{ key: "all", label: "الكل" }, ...Object.entries(sectionNames).map(([key, label]) => ({ key, label }))];
+      el.tabs.innerHTML = tabs.map(t => `<button class="tab ${appState.activeTab === t.key ? "active" : ""}" data-tab="${t.key}">${t.label}</button>`).join("");
+      el.tabs.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          appState.activeTab = btn.dataset.tab;
+          renderTabs();
+          renderList();
+        });
+      });
+    }
+
+    function renderList() {
+      const entries = appState.activeTab === "all"
+        ? appState.entries
+        : appState.entries.filter(e => e.section === appState.activeTab);
+
+      if (!entries.length) {
+        el.listArea.innerHTML = `<div class="empty">لا توجد عناصر في هذا القسم حتى الآن.</div>`;
+        return;
+      }
+
+      const sorted = entries.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      const renderItem = (item) => {
+        const filePart = item.fileName ? `<small>ملف مرفق: ${item.fileName}</small>` : "";
+        const tagPart = item.tag ? `<small>تصنيف/مهارة: ${item.tag}</small>` : "";
+        const deleteBtn = appState.isSharedView ? "" : `<button class="btn btn-danger" data-delete="${item.id}">حذف</button>`;
+        const editBtn = appState.isSharedView ? "" : `<button class="btn btn-secondary" data-edit="${item.id}">تعديل</button>`;
+        let mediaPart = "";
+        const mediaSrc = item.mediaUrl || item.mediaDataUrl || "";
+        if (item.mediaKind === "image" && mediaSrc) {
+          mediaPart = `<div class="media-wrap"><img src="${mediaSrc}" alt="${item.title}" loading="lazy" /></div>`;
+        } else if (item.mediaKind === "video" && mediaSrc) {
+          mediaPart = `<div class="media-wrap"><video controls preload="metadata"><source src="${mediaSrc}" /></video></div>`;
+        }
+        return `
+          <article class="item">
+            <div class="top">
+              <h4>${item.title}</h4>
+              <div class="actions">${editBtn}${deleteBtn}</div>
+            </div>
+            <p>${item.description || "-"}</p>
+            ${mediaPart}
+            <small>القسم: ${sectionNames[item.section] || item.section}</small>
+            ${tagPart}
+            ${filePart}
+            <small>تاريخ الإضافة: ${fmtDate(item.createdAt)}</small>
+          </article>
+        `;
+      };
+
+      if (appState.isSharedView && appState.activeTab === "all") {
+        const blocks = Object.keys(sectionNames)
+          .map((key) => {
+            const sectionEntries = sorted.filter((item) => item.section === key);
+            if (!sectionEntries.length) return "";
+            return `
+              <section class="section-block">
+                <h3 class="section-title">${sectionNames[key]}</h3>
+                ${sectionEntries.map(renderItem).join("")}
+              </section>
+            `;
+          })
+          .filter(Boolean)
+          .join("");
+
+        el.listArea.innerHTML = blocks || `<div class="empty">لا توجد عناصر في هذا الملف.</div>`;
+      } else {
+        el.listArea.innerHTML = sorted.map(renderItem).join("");
+      }
+
+      if (!appState.isSharedView) {
+        el.listArea.querySelectorAll("[data-edit]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-edit");
+            const entry = appState.entries.find(e => e.id === id);
+            if (!entry) return;
+            appState.editingEntryId = id;
+            el.sectionType.value = entry.section || "daily";
+            el.entryTitle.value = entry.title || "";
+            el.entryDesc.value = entry.description || "";
+            el.entryTag.value = entry.tag || "";
+            el.entryFile.value = "";
+            el.fileNote.textContent = "يمكنك اختيار ملف جديد لاستبدال الوسائط الحالية، أو اتركه فارغًا للحفاظ على الملف الحالي.";
+            el.addEntryBtn.textContent = "حفظ التعديلات";
+            el.cancelEditBtn.hidden = false;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        });
+        el.listArea.querySelectorAll("[data-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-delete");
+            const before = appState.entries.slice();
+            appState.entries = appState.entries.filter(e => e.id !== id);
+            try {
+              await savePortfolioRemote();
+              computeStats();
+              renderList();
+            } catch (error) {
+              appState.entries = before;
+              alert("تعذر حذف الإنجاز من قاعدة البيانات.");
+            }
+          });
+        });
+      }
+    }
+
+    function generateAiReport() {
+      const p = appState.profile;
+      const total = appState.entries.length;
+      const bySection = Object.keys(sectionNames).map(key => {
+        const count = appState.entries.filter(e => e.section === key).length;
+        return { key, count, label: sectionNames[key] };
+      });
+
+      const top = bySection.slice().sort((a, b) => b.count - a.count)[0];
+      const low = bySection.filter(x => x.count === 0).map(x => x.label);
+
+      const strengths = [];
+      if (bySection.find(x => x.key === "daily")?.count >= 3) strengths.push("استمرارية ممتازة في التحضير اليومي");
+      if (bySection.find(x => x.key === "classroom")?.count >= 2) strengths.push("تنوع واضح في الأنشطة الصفية");
+      if (bySection.find(x => x.key === "professional")?.count >= 2) strengths.push("اهتمام جيد بالتطوير المهني");
+      if (!strengths.length) strengths.push("بداية جيدة في بناء ملف إنجاز منظم");
+
+      const suggestions = [];
+      if (low.length) suggestions.push(`ينصح بتعزيز الأقسام التالية: ${low.join("، ")}.`);
+      suggestions.push("إضافة أدلة نوعية (صور، فيديو، شهادات) لكل نشاط رئيسي.");
+      suggestions.push("كتابة انعكاس قصير بعد كل مبادرة لقياس الأثر على تعلم الطلبة.");
+
+      const score = Math.min(100, Math.round(total * 8 + (7 - low.length) * 5));
+
+      const report = [
+        `تقرير ملف الإنجاز الذكي للمعلم: ${p.name}`,
+        `المدرسة: ${p.school}`,
+        `المادة: ${p.subject}`,
+        `الصفوف: ${p.grades}`,
+        "",
+        `ملخص الأداء العام: ${score}%`,
+        `إجمالي الإنجازات الموثقة: ${total}`,
+        `أكثر محور نشاطًا: ${top?.label || "لا يوجد"}`,
+        "",
+        "نقاط القوة:",
+        ...strengths.map(s => `- ${s}`),
+        "",
+        "مقترحات تطوير:",
+        ...suggestions.map(s => `- ${s}`),
+        "",
+        "توزيع الإنجازات حسب الأقسام:",
+        ...bySection.map(s => `- ${s.label}: ${s.count}`),
+        "",
+        `تاريخ توليد التقرير: ${fmtDate(new Date().toISOString())}`
+      ].join("\n");
+
+      el.reportBox.hidden = false;
+      el.reportBox.textContent = report;
+    }
+
+    function applySharedPortfolio(decoded) {
+      if (!decoded?.profile) return false;
+      appState.profile = decoded.profile;
+      appState.entries = decoded.entries || [];
+      appState.activeTab = "all";
+      appState.isSharedView = true;
+      document.body.classList.add("shared-view");
+      setSettingsPanel(false);
+      el.loginOverlay.hidden = true;
+      el.loginOverlay.classList.add("is-hidden");
+      el.loginOverlay.style.display = "none";
+      el.app.hidden = false;
+      updateHeader();
+      fillSettingsFromProfile();
+      renderTabs();
+      renderList();
+      computeStats();
+      el.shareBox.hidden = false;
+      el.shareBox.innerHTML = `<strong>عرض مشترك للملف</strong><br>تم فتح نسخة المشاركة بتاريخ ${fmtDate(decoded.generatedAt || new Date().toISOString())}.<br><span class="shared-badge">وضع تقييم فقط</span>`;
+      return true;
+    }
+
+    async function fetchSharedPortfolio(shortId) {
+      const res = await fetch(`${API_BASE}/api/portfolios/${encodeURIComponent(shortId)}`);
+      if (!res.ok) return null;
+      return res.json();
+    }
+
+    async function makeShareLink() {
+      const snapshot = {
+        profile: {
+          ...appState.profile,
+          shareTheme: normalizeTheme(appState.profile?.shareTheme || "classic"),
+          password: undefined
+        },
+        entries: appState.entries,
+        generatedAt: new Date().toISOString()
+      };
+
+      const payload = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(snapshot)))));
+      const link = `${location.origin}${location.pathname}#portfolio=${payload}`;
+
+      if (link.length > 120000) {
+        alert("الملف كبير جدًا بسبب الوسائط. يُفضّل تقليل حجم الصور/الفيديو قبل إنشاء الرابط.");
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/portfolios`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(snapshot)
+        });
+        if (!res.ok) {
+          let details = {};
+          try {
+            details = await res.json();
+          } catch (e) {}
+          const reason = details?.error || "share_failed";
+          throw new Error(reason);
+        }
+        const data = await res.json();
+        const shortLink = data.url || link;
+        el.shareBox.hidden = false;
+        el.shareBox.innerHTML = `<strong>رابط المشاركة:</strong><br>${shortLink}`;
+        navigator.clipboard?.writeText(shortLink).catch(() => {});
+      } catch (error) {
+        el.shareBox.hidden = false;
+        const isDbMissing = String(error?.message || "").includes("db_not_configured");
+        if (isDbMissing) {
+          el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير.</strong><br>يلزم ربط قاعدة بيانات Neon وإضافة DATABASE_URL في Vercel.<br>رابط بديل مؤقت:<br>${link}`;
+        } else {
+          el.shareBox.innerHTML = `<strong>تعذر إنشاء الرابط القصير من الخادم.</strong><br>تم إنشاء رابط بديل:<br>${link}`;
+        }
+        navigator.clipboard?.writeText(link).catch(() => {});
+      }
+    }
+
+    async function maybeLoadSharedPortfolio() {
+      const pathMatch = location.pathname.match(/^\/share\/([A-Za-z0-9]+)$/);
+      if (pathMatch) {
+        try {
+          const payload = await fetchSharedPortfolio(pathMatch[1]);
+          return applySharedPortfolio(payload);
+        } catch (e) {
+          console.warn("Failed to fetch shared portfolio", e);
+          return false;
+        }
+      }
+
+      if (!location.hash.startsWith("#portfolio=")) return false;
+      const data = location.hash.replace("#portfolio=", "");
+      try {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(data)))));
+        return applySharedPortfolio(decoded);
+      } catch (e) {
+        console.warn("Invalid shared hash", e);
+        return false;
+      }
+    }
+
+    async function init() {
+      if (await maybeLoadSharedPortfolio()) return;
+
+      appState.isSharedView = false;
+      document.body.classList.remove("shared-view");
+      showAuthOverlay("login");
+      switchAuthMode("login");
+      el.loginPassword.value = "";
+    }
+
+    el.startBtn.addEventListener("click", async () => {
+      const profile = {
+        name: el.teacherName.value.trim(),
+        contact: el.contact.value.trim(),
+        school: el.school.value.trim(),
+        subject: el.subject.value.trim(),
+        grades: el.grades.value.trim(),
+        password: el.registerPassword.value
+      };
+      const passwordConfirm = el.registerPasswordConfirm.value;
+
+      if (!profile.name || !profile.contact || !profile.school || !profile.subject || !profile.grades || !profile.password) {
+        alert("يرجى تعبئة جميع بيانات الحساب قبل الدخول.");
+        return;
+      }
+      if (!profile.contact.includes("@")) {
+        alert("يرجى إدخال بريد إلكتروني صحيح.");
+        return;
+      }
+      if (profile.password.length < 6) {
+        alert("كلمة المرور يجب أن تكون 6 أحرف/أرقام على الأقل.");
+        return;
+      }
+      if (profile.password !== passwordConfirm) {
+        alert("تأكيد كلمة المرور غير مطابق.");
+        return;
+      }
+
+      try {
+        const out = await apiJson("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(profile)
+        });
+        appState.userId = out.userId || "";
+        appState.profile = out.profile || {
+          name: profile.name,
+          contact: profile.contact,
+          school: profile.school,
+          subject: profile.subject,
+          grades: profile.grades,
+          shareTheme: "classic"
+        };
+        appState.entries = Array.isArray(out.entries) ? out.entries : [];
+        el.loginPassword.value = "";
+        openDashboard();
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("user_exists")) {
+          alert("هذا الحساب مسجل مسبقًا. استخدم تسجيل الدخول.");
+          switchAuthMode("login");
+          el.loginContact.value = profile.contact;
+        } else {
+          alert("تعذر إنشاء الحساب. تحقق من إعدادات الخادم ثم أعد المحاولة.");
+        }
+      }
+    });
+
+    el.modeRegisterBtn.addEventListener("click", () => switchAuthMode("register"));
+    el.modeLoginBtn.addEventListener("click", () => switchAuthMode("login"));
+
+    el.loginBtn.addEventListener("click", async () => {
+      const enteredContact = normalizeLoginId(el.loginContact.value);
+      const enteredPassword = el.loginPassword.value;
+
+      if (!enteredContact || !enteredPassword) {
+        alert("يرجى إدخال رقم/إيميل الدخول وكلمة المرور.");
+        return;
+      }
+      if (!enteredContact.includes("@")) {
+        alert("يرجى إدخال بريد إلكتروني صحيح.");
+        return;
+      }
+
+      try {
+        const out = await apiJson("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact: enteredContact,
+            password: enteredPassword
+          })
+        });
+        appState.userId = out.userId || "";
+        appState.profile = out.profile || null;
+        appState.entries = Array.isArray(out.entries) ? out.entries : [];
+        openDashboard();
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("invalid_credentials")) {
+          alert("بيانات الدخول غير صحيحة.");
+        } else if (reason.includes("not_found")) {
+          alert("الحساب غير موجود. استخدم تسجيل جديد أولاً.");
+          switchAuthMode("register");
+        } else {
+          alert("تعذر تسجيل الدخول. تحقق من الاتصال ثم أعد المحاولة.");
+        }
+      }
+    });
+
+    el.forgotBtn.addEventListener("click", () => {
+      setRecoveryMode(el.recoveryForm.hidden);
+      el.recoveryContact.value = el.loginContact.value.trim();
+    });
+
+    el.resetPasswordBtn.addEventListener("click", async () => {
+      const recoveryContact = normalizeLoginId(el.recoveryContact.value);
+      const recoveryName = el.recoveryName.value.trim();
+      const newPassword = el.newPassword.value;
+      const newPasswordConfirm = el.newPasswordConfirm.value;
+
+      if (!recoveryContact || !newPassword || !newPasswordConfirm) {
+        alert("يرجى تعبئة بيانات الاسترجاع وكلمة المرور الجديدة.");
+        return;
+      }
+      if (!recoveryContact.includes("@")) {
+        alert("يرجى إدخال بريد إلكتروني صحيح.");
+        return;
+      }
+      if (recoveryContact !== normalizeLoginId(appState.profile.contact)) {
+        alert("رقم/إيميل الاسترجاع غير مطابق للحساب.");
+        return;
+      }
+      if (recoveryName && recoveryName !== appState.profile.name) {
+        alert("اسم المعلم غير مطابق للحساب.");
+        return;
+      }
+      if (newPassword.length < 6) {
+        alert("كلمة المرور الجديدة يجب أن تكون 6 أحرف/أرقام على الأقل.");
+        return;
+      }
+      if (newPassword !== newPasswordConfirm) {
+        alert("تأكيد كلمة المرور الجديدة غير مطابق.");
+        return;
+      }
+
+      try {
+        await apiJson("/api/auth/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact: recoveryContact,
+            name: recoveryName,
+            newPassword
+          })
+        });
+        el.loginContact.value = recoveryContact;
+        el.loginPassword.value = "";
+        setRecoveryMode(false);
+        alert("تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.");
+      } catch (error) {
+        const reason = String(error?.message || "");
+        if (reason.includes("not_found")) {
+          alert("الحساب غير موجود.");
+        } else if (reason.includes("name_mismatch")) {
+          alert("اسم المعلم غير مطابق للحساب.");
+        } else {
+          alert("تعذر تحديث كلمة المرور الآن. حاول مرة أخرى.");
+        }
+      }
+    });
+    el.entryFile.addEventListener("change", () => {
+      const file = el.entryFile.files?.[0];
+      el.fileNote.textContent = file
+        ? `تم اختيار الملف: ${file.name} (سيتم رفعه إلى Vercel Storage إذا كان صورة أو فيديو).`
+        : "سيتم رفع الصور والفيديو إلى Vercel Storage وتخزين رابطها داخل الإنجاز.";
+    });
+
+    el.addEntryBtn.addEventListener("click", async () => {
+      if (!appState.profile || !appState.userId) {
+        alert("يرجى تسجيل الدخول أولاً.");
+        return;
+      }
+
+      const title = el.entryTitle.value.trim();
+      if (!title) {
+        alert("يرجى إدخال عنوان الإنجاز.");
+        return;
+      }
+
+      const file = el.entryFile.files?.[0];
+      const fileName = file?.name || "";
+      let mediaKind = "";
+      let mediaDataUrl = "";
+      let mediaUrl = "";
+      let mediaFileId = "";
+      let mediaName = "";
+
+      if (file) {
+        try {
+          if (file.type.startsWith("image/")) {
+            mediaKind = "image";
+            if (file.size > 3 * 1024 * 1024) {
+              alert("حجم الصورة كبير جدًا (أكثر من 3MB). صغّر الصورة ثم أعد المحاولة.");
+              return;
+            }
+            const uploaded = await uploadMediaToBackend(file, mediaKind);
+            mediaUrl = uploaded.mediaUrl || "";
+            mediaFileId = uploaded.mediaFileId || "";
+            mediaName = uploaded.mediaName || file.name;
+          } else if (file.type.startsWith("video/")) {
+            if (file.size > 3 * 1024 * 1024) {
+              alert("حجم الفيديو كبير جدًا (أكثر من 3MB) للنشر الحالي. اختر ملفًا أصغر أو اضغط الفيديو.");
+              return;
+            }
+            mediaKind = "video";
+            const uploaded = await uploadMediaToBackend(file, mediaKind);
+            mediaUrl = uploaded.mediaUrl || "";
+            mediaFileId = uploaded.mediaFileId || "";
+            mediaName = uploaded.mediaName || file.name;
+          }
+        } catch (error) {
+          const packed = String(error?.message || "");
+          const [reason, detail] = packed.split("::");
+          if (reason.includes("blob_not_configured")) {
+            alert("تعذر رفع الوسائط: يجب تفعيل Vercel Blob في المشروع.");
+          } else if (reason.includes("db_not_configured")) {
+            alert("تعذر رفع الوسائط: قاعدة بيانات Neon غير مهيأة. أضف DATABASE_URL في Vercel.");
+          } else if (reason.includes("payload_too_large")) {
+            alert("حجم الملف أكبر من الحد المسموح في الرفع الحالي.");
+          } else if (detail) {
+            alert(`تعذر رفع الملف إلى Vercel Storage: ${detail}`);
+          } else {
+            alert("تعذر رفع الملف إلى Vercel Storage. جرّب ملفًا أصغر أو أعد المحاولة.");
+          }
+          return;
+        }
+      }
+
+      const editingId = appState.editingEntryId;
+      const existing = editingId ? appState.entries.find((e) => e.id === editingId) : null;
+
+      const nextEntry = {
+        id: existing?.id || crypto.randomUUID(),
+        section: el.sectionType.value,
+        title,
+        description: el.entryDesc.value.trim(),
+        tag: el.entryTag.value.trim(),
+        fileName: fileName || existing?.fileName || "",
+        mediaKind: mediaKind || existing?.mediaKind || "",
+        mediaUrl: mediaUrl || existing?.mediaUrl || "",
+        mediaFileId: mediaFileId || existing?.mediaFileId || "",
+        mediaName: mediaName || existing?.mediaName || "",
+        createdAt: existing?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const before = appState.entries.slice();
+      if (existing) {
+        appState.entries = appState.entries.map((e) => (e.id === editingId ? nextEntry : e));
+      } else {
+        appState.entries.push(nextEntry);
+      }
+
+      try {
+        await savePortfolioRemote();
+        computeStats();
+        renderList();
+        resetEntryForm();
+      } catch (error) {
+        appState.entries = before;
+        alert(existing ? "تعذر تحديث الإنجاز في قاعدة البيانات." : "تعذر حفظ الإنجاز في قاعدة البيانات. أعد المحاولة.");
+      }
+    });
+
+    el.cancelEditBtn.addEventListener("click", () => {
+      resetEntryForm();
+    });
+
+    el.saveSettingsBtn.addEventListener("click", async () => {
+      if (!appState.profile || !appState.userId) {
+        alert("يرجى تسجيل الدخول أولاً.");
+        return;
+      }
+
+      const nextProfile = {
+        ...appState.profile,
+        name: el.settingsName.value.trim(),
+        contact: normalizeLoginId(el.settingsContact.value),
+        school: el.settingsSchool.value.trim(),
+        subject: el.settingsSubject.value.trim(),
+        grades: el.settingsGrades.value.trim(),
+        shareTheme: normalizeTheme(el.settingsTheme.value)
+      };
+
+      if (!nextProfile.name || !nextProfile.contact || !nextProfile.school || !nextProfile.subject || !nextProfile.grades) {
+        alert("يرجى تعبئة كل بيانات الملف الشخصي قبل الحفظ.");
+        return;
+      }
+      if (!nextProfile.contact.includes("@")) {
+        alert("يرجى إدخال بريد إلكتروني صحيح.");
+        return;
+      }
+
+      const prev = { ...appState.profile };
+      appState.profile = nextProfile;
+      updateHeader();
+      try {
+        await savePortfolioRemote();
+        alert("تم حفظ إعدادات الملف الشخصي والثيم بنجاح.");
+      } catch (error) {
+        appState.profile = prev;
+        updateHeader();
+        alert("تعذر حفظ الإعدادات في قاعدة البيانات.");
+      }
+    });
+
+    el.settingsToggleBtn.addEventListener("click", () => {
+      setSettingsPanel(el.settingsPanel.hidden);
+    });
+    el.closeSettingsBtn.addEventListener("click", () => {
+      setSettingsPanel(false);
+    });
+
+    el.clearDataBtn.addEventListener("click", async () => {
+      const ok = confirm("هل تريد مسح جميع البيانات؟ لا يمكن التراجع.");
+      if (!ok) return;
+      if (!appState.userId) {
+        location.hash = "";
+        location.reload();
+        return;
+      }
+      try {
+        await apiJson("/api/portfolio/clear", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: appState.userId })
+        });
+        appState.entries = [];
+        computeStats();
+        renderList();
+        alert("تم مسح بيانات الإنجازات من قاعدة البيانات.");
+      } catch (error) {
+        alert("تعذر مسح البيانات من قاعدة البيانات.");
+      }
+    });
+
+    el.generateAiBtn.addEventListener("click", generateAiReport);
+    el.downloadPdfBtn.addEventListener("click", () => window.print());
+    el.shareBtn.addEventListener("click", () => { makeShareLink(); });
+
+    init();
+  </script>
+</body>
+</html>
+
+
+
+
+
